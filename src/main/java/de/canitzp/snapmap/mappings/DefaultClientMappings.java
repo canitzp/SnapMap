@@ -117,11 +117,11 @@ public class DefaultClientMappings extends MappingsBase {
             "net/minecraft/client/multiplayer/WorldClient"
     },
             providesFields = {
-                    "net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient;"
+                    "net/minecraft/client/Minecraft world Lnet/minecraft/client/multiplayer/WorldClient;"
             },
             providesMethods = {
                     "net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft;",
-                    "net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem;",
+                    "net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/RenderItem;",
                     "net/minecraft/client/Minecraft refreshResources ()V",
                     "net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V",
                     "net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer;",
@@ -129,13 +129,13 @@ public class DefaultClientMappings extends MappingsBase {
             },
             depends = {
                     "net/minecraft/client/Minecraft",
-                    "net/minecraft/client/renderer/entity/RenderItem",
+                    "net/minecraft/client/renderer/RenderItem",
                     "net/minecraft/world/World",
                     "net/minecraft/client/renderer/texture/TextureMap"
             })
     public boolean processMinecraftClass() {
         ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
-        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
+        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/RenderItem");
         ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
         ClassNode textureMap = getClassNodeFromMapping("net/minecraft/client/renderer/texture/TextureMap");
         if (!MeddleUtil.notNull(minecraft, renderItem, world, textureMap)) return false;
@@ -162,7 +162,7 @@ public class DefaultClientMappings extends MappingsBase {
         // public RenderItem getRenderItem()
         methods = DynamicMappings.getMatchingMethods(minecraft, null, "()L" + renderItem.name + ";");
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem;",
+            addMethodMapping("net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/RenderItem;",
                     minecraft.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 
@@ -255,7 +255,7 @@ public class DefaultClientMappings extends MappingsBase {
             }
 
             if (count == 1) {
-                addFieldMapping("net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient;",
+                addFieldMapping("net/minecraft/client/Minecraft world Lnet/minecraft/client/multiplayer/WorldClient;",
                         minecraft.name + " " + theWorld_name + " L" + worldClient.name + ";");
             }
         }
@@ -273,20 +273,20 @@ public class DefaultClientMappings extends MappingsBase {
     }
 
     @Mapping(providesMethods = {
-            "net/minecraft/client/renderer/entity/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher;"
+            "net/minecraft/client/renderer/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher;"
     },
             depends = {
-                    "net/minecraft/client/renderer/entity/RenderItem",
+                    "net/minecraft/client/renderer/RenderItem",
                     "net/minecraft/client/renderer/ItemModelMesher"
             })
     public boolean parseRenderItemClass() {
-        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
+        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/RenderItem");
         ClassNode modelMesher = getClassNodeFromMapping("net/minecraft/client/renderer/ItemModelMesher");
         if (renderItem == null || modelMesher == null) return false;
 
         List<MethodNode> methods = DynamicMappings.getMatchingMethods(renderItem, null, "()L" + modelMesher.name + ";");
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/client/renderer/entity/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher;",
+            addMethodMapping("net/minecraft/client/renderer/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher;",
                     renderItem.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 
@@ -294,7 +294,7 @@ public class DefaultClientMappings extends MappingsBase {
         return true;
     }
 
-    @Mapping(provides = "net/minecraft/client/renderer/entity/RenderItem", depends = "net/minecraft/client/Minecraft")
+    @Mapping(provides = "net/minecraft/client/renderer/RenderItem", depends = "net/minecraft/client/Minecraft")
     public boolean getRenderItemClass() {
         ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
         if (minecraft == null) return false;
@@ -308,7 +308,7 @@ public class DefaultClientMappings extends MappingsBase {
             if (className.contains(".")) continue;
 
             if (DynamicMappings.searchConstantPoolForStrings(className, "textures/misc/enchanted_item_glint.png", "Rendering item")) {
-                addClassMapping("net/minecraft/client/renderer/entity/RenderItem", getClassNode(className));
+                addClassMapping("net/minecraft/client/renderer/RenderItem", getClassNode(className));
                 return true;
             }
 
@@ -319,9 +319,9 @@ public class DefaultClientMappings extends MappingsBase {
         return false;
     }
 
-    @Mapping(provides = "net/minecraft/client/renderer/ItemModelMesher", depends = "net/minecraft/client/renderer/entity/RenderItem")
+    @Mapping(provides = "net/minecraft/client/renderer/ItemModelMesher", depends = "net/minecraft/client/renderer/RenderItem")
     public boolean getItemModelMesherClass() {
-        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
+        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/RenderItem");
         if (renderItem == null) return false;
 
         // Find constructor RenderItem(TextureManager, ModelManager)
@@ -634,7 +634,7 @@ public class DefaultClientMappings extends MappingsBase {
     },
             providesFields = {
                     "net/minecraft/client/gui/GuiScreen mc Lnet/minecraft/client/Minecraft;",
-                    "net/minecraft/client/gui/GuiScreen itemRender Lnet/minecraft/client/renderer/entity/RenderItem;",
+                    "net/minecraft/client/gui/GuiScreen itemRender Lnet/minecraft/client/renderer/RenderItem;",
                     "net/minecraft/client/gui/GuiScreen width I",
                     "net/minecraft/client/gui/GuiScreen height I",
                     "net/minecraft/client/gui/GuiScreen fontRendererObj Lnet/minecraft/client/gui/FontRenderer;",
@@ -659,12 +659,12 @@ public class DefaultClientMappings extends MappingsBase {
             depends = {
                     "net/minecraft/client/gui/GuiScreen",
                     "net/minecraft/client/Minecraft",
-                    "net/minecraft/client/renderer/entity/RenderItem"
+                    "net/minecraft/client/renderer/RenderItem"
             })
     public boolean processGuiScreenClass() {
         ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
         ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
-        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
+        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/RenderItem");
         if (guiScreen == null || minecraft == null || renderItem == null) return false;
 
         List<MethodNode> methods = DynamicMappings.getMatchingMethods(minecraft, null, "(L" + guiScreen.name + ";)V");
@@ -708,7 +708,7 @@ public class DefaultClientMappings extends MappingsBase {
                     addFieldMapping("net/minecraft/client/gui/GuiScreen mc Lnet/minecraft/client/Minecraft;",
                             guiScreen.name + " " + fn.name + " " + fn.desc);
                 } else if (fn.desc.equals("L" + renderItem.name + ";")) {
-                    addFieldMapping("net/minecraft/client/gui/GuiScreen itemRender Lnet/minecraft/client/renderer/entity/RenderItem;",
+                    addFieldMapping("net/minecraft/client/gui/GuiScreen itemRender Lnet/minecraft/client/renderer/RenderItem;",
                             renderItem.name + " " + fn.name + " " + fn.desc);
                 } else if (fn.desc.equals("I")) {
                     if (prevInsn.getOpcode() == Opcodes.ILOAD) {
@@ -1203,7 +1203,7 @@ public class DefaultClientMappings extends MappingsBase {
             "net/minecraft/client/settings/GameSettings"
     },
             providesFields = {
-                    "net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP;",
+                    "net/minecraft/client/Minecraft player Lnet/minecraft/client/entity/EntityPlayerSP;",
                     "net/minecraft/client/gui/inventory/GuiContainer guiLeft I",
                     "net/minecraft/client/gui/inventory/GuiContainer guiTop I"
             },
@@ -1270,7 +1270,7 @@ public class DefaultClientMappings extends MappingsBase {
                 Type t = Type.getType(fn.desc);
                 if (t.getSort() != Type.OBJECT) continue;
                 if (t.getClassName().equals(playerSP.name)) {
-                    addFieldMapping("net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP;",
+                    addFieldMapping("net/minecraft/client/Minecraft player Lnet/minecraft/client/entity/EntityPlayerSP;",
                             minecraft.name + " " + fn.name + " " + fn.desc);
                 } else if (DynamicMappings.searchConstantPoolForStrings(t.getClassName(), "options.particles.all", "key.forward", "enableVsync:")) {
                     addClassMapping("net/minecraft/client/settings/GameSettings", t.getClassName());
@@ -3157,7 +3157,7 @@ public class DefaultClientMappings extends MappingsBase {
     }
 
     @Mapping(depends = {
-            "net/minecraft/client/renderer/entity/RenderItem",
+            "net/minecraft/client/renderer/RenderItem",
             "net/minecraft/init/Items",
             "net/minecraft/item/ItemStack"
     },
@@ -3172,7 +3172,7 @@ public class DefaultClientMappings extends MappingsBase {
             }
     )
     public boolean processRenderItemClass() {
-        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
+        ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/RenderItem");
         ClassNode items = getClassNodeFromMapping("net/minecraft/init/Items");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
         if (renderItem == null || items == null || itemStack == null) return false;

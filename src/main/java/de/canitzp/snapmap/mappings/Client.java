@@ -19,11 +19,14 @@ public class Client extends MappingsBase {
 
     private static final Map<String[], String> unknownGuiClasses = new HashMap<String[], String>(){{
         put(new String[]{"enchantment.level.2", "enchantment.level.3", "enchantment.level.4"}, "inventory/InventoryEffectRenderer");
+        put(new String[]{"textures/gui/achievement/achievement_background.png", "achievement.get"}, "achievement/GuiAchievement");
     }};
 
     @Mapping(
             depends = "net/minecraft/client/gui/Gui",
-            provides = "net/minecraft/client/gui/inventory/InventoryEffectRenderer")
+            provides = {"net/minecraft/client/gui/inventory/InventoryEffectRenderer",
+                    "net/minecraft/client/gui/achievement/GuiAchievement"
+            })
     public void processGuis(){
         ClassNode gui = getClassNodeFromMapping("net/minecraft/client/gui/Gui");
         if(MeddleUtil.notNull(gui)){

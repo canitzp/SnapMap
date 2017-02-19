@@ -1,6 +1,5 @@
 package de.canitzp.snapmap;
 
-import com.google.common.collect.Lists;
 import de.canitzp.snapmap.mappings.*;
 import net.fybertech.dynamicmappings.AccessUtil;
 import net.fybertech.dynamicmappings.DynamicMappings;
@@ -39,6 +38,7 @@ public class SnapMap implements ITweaker {
         addMapperClass(Common.class);
         addMapperClass(Client.class);
         addMapperClass(ClassStringMapper.class);
+        addMapperClass(FieldRemapper.class);
     }
 
     @Override
@@ -48,7 +48,6 @@ public class SnapMap implements ITweaker {
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader launchClassLoader) {
-
     }
 
     @Override
@@ -144,11 +143,6 @@ public class SnapMap implements ITweaker {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static List<String> getAllUnmappedClasses(){
-        List<String> ret = new ArrayList<>();
-        return ret;
     }
 
 }

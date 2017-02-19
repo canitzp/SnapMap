@@ -2652,13 +2652,13 @@ public class DefaultSharedMappings extends MappingsBase {
                     "net/minecraft/entity/item/EntityEnderPearl",
                     "net/minecraft/entity/Entity",
                     "net/minecraft/entity/EntityLivingBase",
-                    "net/minecraft/util/MovingObjectPosition"
+                    "net/minecraft/util/math/RayTraceResult"
             })
     public boolean processEntityEnderPearlClass() {
         ClassNode pearl = getClassNodeFromMapping("net/minecraft/entity/item/EntityEnderPearl");
         ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
         ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
-        ClassNode movingObjectPos = getClassNodeFromMapping("net/minecraft/util/MovingObjectPosition");
+        ClassNode movingObjectPos = getClassNodeFromMapping("net/minecraft/util/math/RayTraceResult");
         if (pearl == null || entity == null || movingObjectPos == null) return false;
 
         // protected void onImpact(MovingObjectPosition param0)
@@ -5146,7 +5146,7 @@ public class DefaultSharedMappings extends MappingsBase {
             providesMethods = {
                     "net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I",
                     "net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z",
-                    "net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
+                    "net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/math/RayTraceResult;",
                     "net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V",
                     "net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V",
                     "net/minecraft/block/Block getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState;",
@@ -5177,7 +5177,7 @@ public class DefaultSharedMappings extends MappingsBase {
                     "net/minecraft/entity/player/EntityPlayer",
                     "net/minecraft/util/MainOrOffHand",
                     "net/minecraft/util/EnumFacing",
-                    "net/minecraft/util/MovingObjectPosition",
+                    "net/minecraft/util/math/RayTraceResult",
                     "net/minecraft/util/ResourceLocation",
                     "net/minecraft/world/IBlockAccess",
                     "net/minecraft/entity/Entity",
@@ -5193,7 +5193,7 @@ public class DefaultSharedMappings extends MappingsBase {
         ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
         ClassNode mainOrOffHand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
         ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
-        ClassNode movingObjectPosition = getClassNodeFromMapping("net/minecraft/util/MovingObjectPosition");
+        ClassNode movingObjectPosition = getClassNodeFromMapping("net/minecraft/util/math/RayTraceResult");
         ClassNode resourceLocation = getClassNodeFromMapping("net/minecraft/util/ResourceLocation");
         ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
         ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
@@ -5324,7 +5324,7 @@ public class DefaultSharedMappings extends MappingsBase {
             MethodNode method = methods.get(0);
             String vec3_name = Type.getMethodType(method.desc).getArgumentTypes()[3].getClassName();
             addClassMapping("net/minecraft/util/Vec3", vec3_name);
-            addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
+            addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/math/RayTraceResult;",
                     block.name + " " + method.name + " " + method.desc);
         }
 
@@ -5857,7 +5857,7 @@ public class DefaultSharedMappings extends MappingsBase {
                     "net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;Z)V",
                     "net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
                     "net/minecraft/block/Block addCollisionBoxToList (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/util/AxisAlignedBB;)V",
-                    "net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;"
+                    "net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/math/RayTraceResult;"
             },
             depends = {
                     "net/minecraft/block/Block",
@@ -5904,7 +5904,7 @@ public class DefaultSharedMappings extends MappingsBase {
         ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
         ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
         ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
-        ClassNode mop = getClassNodeFromMapping("net/minecraft/util/MovingObjectPosition");
+        ClassNode mop = getClassNodeFromMapping("net/minecraft/util/math/RayTraceResult");
 
         if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs,
                 entityPlayer, tileEntity, itemStack, material, mapColor, blockSoundType, explosion, entityLivingBase,
@@ -5926,7 +5926,7 @@ public class DefaultSharedMappings extends MappingsBase {
 
         methods = getMatchingMethods(block, null, assembleDescriptor("(", blockPos, vec3, vec3, aabb, ")", mop));
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;",
+            addMethodMapping("net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/math/RayTraceResult;",
                     block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 
@@ -6448,7 +6448,7 @@ public class DefaultSharedMappings extends MappingsBase {
             "net/minecraft/creativetab/CreativeTabs",
             "net/minecraft/util/RegistryNamespaced",
             "net/minecraft/item/state/IItemState",        // NEW
-            "net/minecraft/util/MovingObjectPosition",
+            "net/minecraft/util/math/RayTraceResult",
             "net/minecraft/util/ResourceLocation"},
             providesMethods = {
                     "net/minecraft/item/Item getMaxStackSize ()I",
@@ -6618,7 +6618,7 @@ public class DefaultSharedMappings extends MappingsBase {
             Type t = Type.getMethodType(method.desc).getReturnType();
             if (t.getSort() != Type.OBJECT) continue;
             if (searchConstantPoolForStrings(t.getClassName(), "HitResult{type=")) {
-                addClassMapping("net/minecraft/util/MovingObjectPosition", t.getClassName());
+                addClassMapping("net/minecraft/util/math/RayTraceResult", t.getClassName());
                 break;
             }
         }
@@ -10673,29 +10673,29 @@ public class DefaultSharedMappings extends MappingsBase {
     }
 
 
-    @Mapping(provides = "net/minecraft/util/MovingObjectPosition$MovingObjectType",
+    @Mapping(provides = "net/minecraft/util/math/RayTraceResult$MovingObjectType",
             providesFields = {
-                    "net/minecraft/util/MovingObjectPosition blockPos Lnet/minecraft/util/BlockPos;",
-                    "net/minecraft/util/MovingObjectPosition sideHit Lnet/minecraft/util/EnumFacing;",
-                    "net/minecraft/util/MovingObjectPosition hitVec Lnet/minecraft/util/Vec3;",
-                    "net/minecraft/util/MovingObjectPosition entityHit Lnet/minecraft/entity/Entity;",
-                    "net/minecraft/util/MovingObjectPosition typeOfHit Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;",
-                    "net/minecraft/util/MovingObjectPosition$MovingObjectType MISS Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;",
-                    "net/minecraft/util/MovingObjectPosition$MovingObjectType BLOCK Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;",
-                    "net/minecraft/util/MovingObjectPosition$MovingObjectType ENTITY Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;"
+                    "net/minecraft/util/math/RayTraceResult blockPos Lnet/minecraft/util/BlockPos;",
+                    "net/minecraft/util/math/RayTraceResult sideHit Lnet/minecraft/util/EnumFacing;",
+                    "net/minecraft/util/math/RayTraceResult hitVec Lnet/minecraft/util/Vec3;",
+                    "net/minecraft/util/math/RayTraceResult entityHit Lnet/minecraft/entity/Entity;",
+                    "net/minecraft/util/math/RayTraceResult typeOfHit Lnet/minecraft/util/math/RayTraceResult$MovingObjectType;",
+                    "net/minecraft/util/math/RayTraceResult$MovingObjectType MISS Lnet/minecraft/util/math/RayTraceResult$MovingObjectType;",
+                    "net/minecraft/util/math/RayTraceResult$MovingObjectType BLOCK Lnet/minecraft/util/math/RayTraceResult$MovingObjectType;",
+                    "net/minecraft/util/math/RayTraceResult$MovingObjectType ENTITY Lnet/minecraft/util/math/RayTraceResult$MovingObjectType;"
             },
             providesMethods = {
-                    "net/minecraft/util/MovingObjectPosition getBlockPos ()Lnet/minecraft/util/BlockPos;"
+                    "net/minecraft/util/math/RayTraceResult getBlockPos ()Lnet/minecraft/util/BlockPos;"
             },
             depends = {
-                    "net/minecraft/util/MovingObjectPosition",
+                    "net/minecraft/util/math/RayTraceResult",
                     "net/minecraft/entity/Entity",
                     "net/minecraft/util/BlockPos",
                     "net/minecraft/util/EnumFacing",
                     "net/minecraft/util/Vec3"
             })
     public boolean processMovingObjectPositionClass() {
-        ClassNode mop = getClassNodeFromMapping("net/minecraft/util/MovingObjectPosition");
+        ClassNode mop = getClassNodeFromMapping("net/minecraft/util/math/RayTraceResult");
         ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
         ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
         ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
@@ -10705,25 +10705,25 @@ public class DefaultSharedMappings extends MappingsBase {
 
         List<FieldNode> fields = getMatchingFields(mop, null, "L" + blockPos.name + ";");
         if (fields.size() == 1) {
-            addFieldMapping("net/minecraft/util/MovingObjectPosition blockPos Lnet/minecraft/util/BlockPos;",
+            addFieldMapping("net/minecraft/util/math/RayTraceResult blockPos Lnet/minecraft/util/BlockPos;",
                     mop.name + " " + fields.get(0).name + " " + fields.get(0).desc);
         }
 
         fields = getMatchingFields(mop, null, "L" + enumFacing.name + ";");
         if (fields.size() == 1) {
-            addFieldMapping("net/minecraft/util/MovingObjectPosition sideHit Lnet/minecraft/util/EnumFacing;",
+            addFieldMapping("net/minecraft/util/math/RayTraceResult sideHit Lnet/minecraft/util/EnumFacing;",
                     mop.name + " " + fields.get(0).name + " " + fields.get(0).desc);
         }
 
         fields = getMatchingFields(mop, null, "L" + vec3.name + ";");
         if (fields.size() == 1) {
-            addFieldMapping("net/minecraft/util/MovingObjectPosition hitVec Lnet/minecraft/util/Vec3;",
+            addFieldMapping("net/minecraft/util/math/RayTraceResult hitVec Lnet/minecraft/util/Vec3;",
                     mop.name + " " + fields.get(0).name + " " + fields.get(0).desc);
         }
 
         fields = getMatchingFields(mop, null, "L" + entity.name + ";");
         if (fields.size() == 1) {
-            addFieldMapping("net/minecraft/util/MovingObjectPosition entityHit Lnet/minecraft/entity/Entity;",
+            addFieldMapping("net/minecraft/util/math/RayTraceResult entityHit Lnet/minecraft/entity/Entity;",
                     mop.name + " " + fields.get(0).name + " " + fields.get(0).desc);
         }
 
@@ -10742,8 +10742,8 @@ public class DefaultSharedMappings extends MappingsBase {
         if (fields.size() == 1) {
             String className = Type.getType(fields.get(0).desc).getClassName();
             if (searchConstantPoolForStrings(className, "MISS", "BLOCK", "ENTITY")) {
-                addClassMapping("net/minecraft/util/MovingObjectPosition$MovingObjectType", className);
-                addFieldMapping("net/minecraft/util/MovingObjectPosition typeOfHit Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;",
+                addClassMapping("net/minecraft/util/math/RayTraceResult$MovingObjectType", className);
+                addFieldMapping("net/minecraft/util/math/RayTraceResult typeOfHit Lnet/minecraft/util/math/RayTraceResult$MovingObjectType;",
                         mop.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 
                 // Map $MovingObjectType's fields while we're at it
@@ -10752,7 +10752,7 @@ public class DefaultSharedMappings extends MappingsBase {
                     Map<String, FieldInsnNode> enumFields = extractEnumFieldsWithNames(mot);
                     for (String key : enumFields.keySet()) {
                         if (key.equals("MISS") || key.equals("BLOCK") || key.equals("ENTITY"))
-                            addFieldMapping("net/minecraft/util/MovingObjectPosition$MovingObjectType " + key + " Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;",
+                            addFieldMapping("net/minecraft/util/math/RayTraceResult$MovingObjectType " + key + " Lnet/minecraft/util/math/RayTraceResult$MovingObjectType;",
                                     mot.name + " " + enumFields.get(key).name + " L" + mot.name + ";");
                     }
                 }
@@ -10763,7 +10763,7 @@ public class DefaultSharedMappings extends MappingsBase {
         // public BlockPos getBlockPos()
         List<MethodNode> methods = getMatchingMethods(mop, null, "()L" + blockPos.name + ";");
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/util/MovingObjectPosition getBlockPos ()Lnet/minecraft/util/BlockPos;",
+            addMethodMapping("net/minecraft/util/math/RayTraceResult getBlockPos ()Lnet/minecraft/util/BlockPos;",
                     mop.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 
