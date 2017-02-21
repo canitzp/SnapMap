@@ -3,6 +3,13 @@ apply from: 'meddle.gradle'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+version = "1.0.0"
+group = "de.canitzp.snapmap"
+
+if(hasProperty('buildnumber')){
+    version = "${version}-${this.properties['buildnumber']}"
+}
+
 mod {
     id = 'snapmap'
     version = '1.0.0'
