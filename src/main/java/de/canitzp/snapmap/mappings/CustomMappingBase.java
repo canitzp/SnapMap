@@ -4,14 +4,14 @@ import com.google.common.collect.Lists;
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.mappers.MappingsBase;
 import org.apache.commons.lang3.StringUtils;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.MethodNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author canitzp
@@ -20,6 +20,10 @@ public class CustomMappingBase extends MappingsBase {
 
     public void addFieldMapping(ClassNode owner, String name, String desc, FieldNode fieldNode){
         this.addFieldMapping(owner.name + " " + name + " " + desc, owner.name + " " + fieldNode.name + " " + desc);
+    }
+
+    public void addMethodMapping(ClassNode owner, String name, String desc, MethodNode method){
+        this.addMethodMapping(owner.name + " " + name + " " + desc, owner.name + " " + method.name + " " + method.desc);
     }
 
     public void addFieldMappingIfSingle(ClassNode classNode, String unobfFieldName, ClassNode fieldType){
@@ -53,6 +57,35 @@ public class CustomMappingBase extends MappingsBase {
         }
     }
 
+    public void automapAllGetter(ClassNode cn){
+        for(MethodNode method : cn.methods){
+            if(method.access == Opcodes.ACC_PUBLIC && method.desc.startsWith("()") && method.instructions.size() == 6){
+                FieldInsnNode fieldInsnNode = (FieldInsnNode) method.instructions.get(3);
+                String mapping = fieldInsnNode.owner + " " + fieldInsnNode.name + " " + fieldInsnNode.desc;
+                if(DynamicMappings.reverseFieldMappings.containsKey(mapping)){
+                    String unobfName = DynamicMappings.reverseFieldMappings.get(mapping).split(" ")[1];
+                    addMethodMapping(cn, "get" + StringUtils.capitalize(unobfName), method.desc, method);
+                }
+            }
+        }
+    }
+
+    public void automapAllSetter(ClassNode cn){
+        for(MethodNode method : cn.methods){
+            if(method.access == Opcodes.ACC_PUBLIC && method.desc.endsWith(")V") && method.instructions.size() == 9){
+                Type[] argsTypes = Type.getArgumentTypes(method.desc);
+                if(argsTypes.length == 1){
+                    FieldInsnNode fieldInsnNode = ((FieldInsnNode)method.instructions.get(4));
+                    String obfName = fieldInsnNode.name;
+                    if(DynamicMappings.reverseFieldMappings.containsKey(fieldInsnNode.owner + " " + obfName + " " + fieldInsnNode.desc)){
+                        String unobfName = DynamicMappings.reverseFieldMappings.get(fieldInsnNode.owner + " " + obfName + " " + fieldInsnNode.desc).split(" ")[1];
+                        addMethodMapping(cn, "set" + StringUtils.capitalize(unobfName), method.desc, method);
+                    }
+                }
+            }
+        }
+    }
+
     public String getMappedName(String obfName){
         for(Map.Entry<String, String> entry : DynamicMappings.classMappings.entrySet()){
             if(entry.getValue().equals(obfName)){
@@ -67,7 +100,11 @@ public class CustomMappingBase extends MappingsBase {
         if(classDesc.equals(obfName)){
             return null;
         }
-        String[] split = classDesc.split("/");
+        return getClassName(classDesc);
+    }
+
+    public String getClassName(String deobfClass){
+        String[] split = deobfClass.split("/");
         return split[split.length-1];
     }
 

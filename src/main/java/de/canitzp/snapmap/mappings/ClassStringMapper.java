@@ -32,6 +32,7 @@ public class ClassStringMapper extends MappingsBase {
         put(new String[]{"GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT", "glCheckFramebufferStatus returned unknown status:"}, "client/shader/Framebuffer");
         put(new String[]{"sounds.json", "Invalid sounds.json", "Not having sound event for: {}"}, "client/audio/SoundHandler");
         put(new String[]{"skins/", "xx"}, "client/resources/SkinManager");
+        put(new String[]{"os.name", "sunos", "Error executing task"}, "util/Util");
     }};
 
     @Mapping

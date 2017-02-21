@@ -19,6 +19,9 @@ public class FieldRemapper extends CustomMappingBase {
             addFieldMappingIfSingle(minecraft, "effectRenderer", getClassNodeFromMapping("net/minecraft/client/particle/ParticleManager"));
             addFieldMappingIfSingle(minecraft, "currentScreen", getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen"));
             addFieldMappingIfSingle(minecraft, "objectMouseOver", getClassNodeFromMapping("net/minecraft/util/math/RayTraceResult"));
+            automapAllGetter(minecraft);
+            automapAllSetter(minecraft);
+            addGetterForField(minecraft, minecraft.fields.get(0));
         }
     }
 

@@ -121,7 +121,7 @@ public class SnapMap implements ITweaker {
                 }
 
                 accessUtil.transformDeobfuscatedClass(mapped);
-                ClassWriter writer = new ClassWriter(0);
+                ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
                 mapped.accept(writer);
                 name = mapped.name + ".class";
                 bytes = writer.toByteArray();
