@@ -21,7 +21,6 @@ public class FieldRemapper extends CustomMappingBase {
             addFieldMappingIfSingle(minecraft, "objectMouseOver", getClassNodeFromMapping("net/minecraft/util/math/RayTraceResult"));
             automapAllGetter(minecraft);
             automapAllSetter(minecraft);
-            addGetterForField(minecraft, minecraft.fields.get(0));
         }
     }
 
