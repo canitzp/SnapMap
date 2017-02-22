@@ -33,6 +33,9 @@ public class ClassStringMapper extends MappingsBase {
         put(new String[]{"sounds.json", "Invalid sounds.json", "Not having sound event for: {}"}, "client/audio/SoundHandler");
         put(new String[]{"skins/", "xx"}, "client/resources/SkinManager");
         put(new String[]{"os.name", "sunos", "Error executing task"}, "util/Util");
+        put(new String[]{"commands.generic.player.unspecified", "commands.tellraw.jsonException", "setLenient"}, "command/CommandBase");
+        put(new String[]{"invulnerable", "flying", "mayfly", "instabuild"}, "entity/player/PlayerCapabilities");
+        put(new String[]{"Using ARB_multitexture.\n", "Using GL 1.3 multitexturing.\n", "Using ARB_texture_env_combine.\n"}, "client/renderer/OpenGlHelper");
     }};
 
     @Mapping

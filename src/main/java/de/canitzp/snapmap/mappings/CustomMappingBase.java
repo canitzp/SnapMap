@@ -37,6 +37,25 @@ public class CustomMappingBase extends MappingsBase {
         }
     }
 
+    public void addMethodIfContainsString(ClassNode classNode, String mappedMethodName, String... strings){
+        List<MethodNode> methods = new ArrayList<>();
+        for(MethodNode method : classNode.methods){
+            boolean flag = false;
+            for(String s : strings){
+                if(!getStringsFromMethod(method).contains(s)){
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag){
+                methods.add(method);
+            }
+        }
+        if(methods.size() == 1){
+            addMethodMapping(classNode, mappedMethodName, methods.get(0).desc, methods.get(0));
+        }
+    }
+
     public void automapAllFieldNames(ClassNode cn){
         Map<String, List<FieldNode>> descToFields = new HashMap<>();
         for(FieldNode field : cn.fields){

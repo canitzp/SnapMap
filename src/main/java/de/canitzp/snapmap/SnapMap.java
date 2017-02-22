@@ -39,6 +39,7 @@ public class SnapMap implements ITweaker {
         addMapperClass(Client.class);
         addMapperClass(ClassStringMapper.class);
         addMapperClass(FieldRemapper.class);
+        addMapperClass(MethodRemapper.class);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class SnapMap implements ITweaker {
         if (mcJar != null) {
             DynamicRemap.remapUnknownChildren(mcJar, "net/minecraft/block/Block", "net/minecraft/item/Item", "net/minecraft/entity/monster/EntityMob",
                     "net/minecraft/entity/Entity", "net/minecraft/tileentity/TileEntity", "net/minecraft/inventory/Container",
-                    "net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase");
+                    "net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase", "net/minecraft/command/CommandBase");
         }
 
         DynamicRemap remapper = new DynamicRemap(
