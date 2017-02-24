@@ -23,7 +23,18 @@ public class CustomMappingBase extends MappingsBase {
     }
 
     public void addMethodMapping(ClassNode owner, String name, String desc, MethodNode method){
-        this.addMethodMapping(owner.name + " " + name + " " + desc, owner.name + " " + method.name + " " + method.desc);
+        if(owner.superName != null){
+            if(DynamicMappings.reverseClassMappings.containsKey(owner.superName)){
+                ClassNode cn = getClassNode(owner.superName);
+                for(MethodNode methodNode : cn.methods){
+                    if(methodNode.name.equals(method.name) && methodNode.desc.equals(method.desc)){
+                        addMethodMapping(cn, name, desc, method);
+                        return;
+                    }
+                }
+            }
+        }
+        this.addMethodMapping(DynamicMappings.reverseClassMappings.get(owner.name) + " " + name + " " + desc, owner.name + " " + method.name + " " + method.desc);
     }
 
     public void addFieldMappingIfSingle(ClassNode classNode, String unobfFieldName, ClassNode fieldType){

@@ -4,10 +4,13 @@ import net.fybertech.dynamicmappings.Mapping;
 import net.fybertech.meddle.MeddleUtil;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author canitzp
@@ -29,12 +32,28 @@ public class FieldRemapper extends CustomMappingBase {
         }
     }
 
-    @Mapping(depends = "net/minecraft/entity/Entity")
+    @Mapping(depends = "net/minecraft/entity/Entity",
+            dependsMethods = "net/minecraft/entity/Entity setPosition (DDD)V"
+            )
     public void findEntityFields(){
         ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
-        if(MeddleUtil.notNull(entity)){
+        MethodNode setPosition = getMethodNodeFromMapping(entity, "net/minecraft/entity/Entity setPosition (DDD)V");
+        if(MeddleUtil.notNull(entity, setPosition)){
             automapAllFieldNames(entity);
             addFieldMappingIfSingle(entity, "LOGGER", "Lorg/apache/logging/log4j/Logger;");
+
+            String s = "xPos";
+            for(AbstractInsnNode insnNode : setPosition.instructions.toArray()){
+                if(insnNode.getOpcode() == Opcodes.PUTFIELD){
+                    FieldInsnNode fieldInsnNode = (FieldInsnNode) insnNode;
+                    addFieldMapping("net/minecraft/entity/Entity " + s + " D", fieldInsnNode);
+                    if(Objects.equals(s, "x")){
+                        s = "yPos";
+                    } else {
+                        s = "zPos";
+                    }
+                }
+            }
         }
     }
 

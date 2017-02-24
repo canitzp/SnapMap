@@ -5,19 +5,15 @@ import net.fybertech.dynamicmappings.AccessUtil;
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.DynamicRemap;
 import net.fybertech.dynamicmappings.mappers.MappingsBase;
-import net.fybertech.meddle.Meddle;
 import net.fybertech.meddle.MeddleMod;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.commons.lang3.ArrayUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -38,8 +34,9 @@ public class SnapMap implements ITweaker {
         addMapperClass(Common.class);
         addMapperClass(Client.class);
         addMapperClass(ClassStringMapper.class);
-        addMapperClass(FieldRemapper.class);
+        addMapperClass(ClassRemapper.class);
         addMapperClass(MethodRemapper.class);
+        addMapperClass(FieldRemapper.class);
     }
 
     @Override

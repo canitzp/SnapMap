@@ -102,11 +102,12 @@ repositories {
 dependencies {
     getmc "net.fybertech:greddle:1.0"
     compile fileTree(dir:'cache/libraries', include: '*.jar', exclude: ['*launchwrapper*','*asm-all*'])
+    compile fileTree(dir: 'cache/src', include: '*.jar')
     decompile "net.fybertech:fernflower:082416"
     compile 'net.minecraft:launchwrapper:1.11'
     compile 'org.ow2.asm:asm-debug-all:5.0.3'
     compile 'net.sf.jopt-simple:jopt-simple:4.6'
-    compile 'net.fybertech:meddle:1.2.2'
+    compile 'net.fybertech:meddle:' + project.meddle.version
 }
 
 
