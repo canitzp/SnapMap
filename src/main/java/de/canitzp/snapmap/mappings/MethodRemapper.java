@@ -1,12 +1,15 @@
 package de.canitzp.snapmap.mappings;
 
+import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.Mapping;
 import net.fybertech.meddle.MeddleUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -53,6 +56,46 @@ public class MethodRemapper extends CustomMappingBase {
             List<MethodNode> methods = getMatchingMethods(entity, Opcodes.ACC_PUBLIC, Type.OBJECT, Type.INT);
             if(methods.size() == 1){
                 addMethodMapping(entity, "changeDimension", methods.get(0).desc, methods.get(0));
+            }
+        }
+    }
+
+    @Mapping(depends = "net/minecraft/nbt/NBTTagCompound")
+    public void mapNBTTagCompoundClass(){
+        ClassNode compound = getClassNodeFromMapping("net/minecraft/nbt/NBTTagCompound");
+        if(MeddleUtil.notNull(compound)){
+            addMethodIfContainsString(compound, "read", "Tried to read NBT tag with too high complexity, depth > 512");
+            addMethodIfSingle(compound, "getKeySet", "()Ljava/util/Set;");
+            for(MethodNode method : compound.methods){
+                if(!isMethodMapped(compound, method) && method.access == Opcodes.ACC_PUBLIC){
+                    if(method.desc.startsWith("(Ljava/lang/String;") && method.desc.endsWith(")V")){
+                        Type secondParameter = Type.getArgumentTypes(method.desc)[1];
+                        String unused = secondParameter.getClassName();
+                        if(unused.contains(".")) {
+                            String[] split = unused.split("\\.");
+                            unused = split[split.length - 1];
+                        }
+                        String name = "set" + StringUtils.capitalize(unused);
+                        if(name.endsWith("[]")){
+                            name = name.substring(0, name.length() - 2).concat("Array");
+                        }
+                        addMethodMapping(compound, name, method.desc, method);
+                    } else if(method.desc.startsWith("(Ljava/lang/String;)") && !method.desc.endsWith("V")){
+                        String unused = Type.getReturnType(method.desc).getClassName();
+                        if(DynamicMappings.reverseClassMappings.containsKey(unused)){
+                            unused = DynamicMappings.reverseClassMappings.get(unused);
+                        }
+                        if(unused.replace("/", ".").contains(".")){
+                            String[] split = unused.replace("/", ".").split("\\.");
+                            unused = split[split.length - 1];
+                        }
+                        String name = "get" + StringUtils.capitalize(unused);
+                        if(name.endsWith("[]")){
+                            name = name.substring(0, name.length() - 2).concat("Array");
+                        }
+                        addMethodIfSingle(compound, name, method.desc);
+                    }
+                }
             }
         }
     }

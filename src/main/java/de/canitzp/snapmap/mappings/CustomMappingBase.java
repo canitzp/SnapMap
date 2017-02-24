@@ -37,6 +37,17 @@ public class CustomMappingBase extends MappingsBase {
         }
     }
 
+    public boolean isMethodMapped(ClassNode classNode, MethodNode methodNode){
+        return DynamicMappings.reverseMethodMappings.containsKey(classNode.name + " " + methodNode.name + " " + methodNode.desc);
+    }
+
+    public void addMethodIfSingle(ClassNode classNode, String unobfMethodName, String methodDesc){
+        List<MethodNode> methodNodes = getMatchingMethods(classNode, null, methodDesc);
+        if(methodNodes.size() == 1){
+            addMethodMapping(classNode, unobfMethodName, methodDesc, methodNodes.get(0));
+        }
+    }
+
     public void addMethodIfContainsString(ClassNode classNode, String mappedMethodName, String... strings){
         List<MethodNode> methods = new ArrayList<>();
         for(MethodNode method : classNode.methods){

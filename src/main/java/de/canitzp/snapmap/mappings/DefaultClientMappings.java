@@ -1234,7 +1234,7 @@ public class DefaultClientMappings extends MappingsBase {
                     "net/minecraft/client/entity/EntityPlayerSP",
                     "net/minecraft/item/ItemStack",
                     "net/minecraft/client/gui/GuiScreen",
-                    "net/minecraft/inventory/EnumContainerAction"
+                    "net/minecraft/inventory/ClickType"
             })
     public boolean processGuiContainerClass() {
         ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
@@ -1243,7 +1243,7 @@ public class DefaultClientMappings extends MappingsBase {
         ClassNode playerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
         ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
-        ClassNode containerAction = getClassNodeFromMapping("net/minecraft/inventory/EnumContainerAction");
+        ClassNode containerAction = getClassNodeFromMapping("net/minecraft/inventory/ClickType");
         if (!MeddleUtil.notNull(guiContainer, slot, minecraft, playerSP, itemStack, guiScreen, containerAction))
             return false;
 
@@ -2798,7 +2798,7 @@ public class DefaultClientMappings extends MappingsBase {
             "net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
             "net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
             "net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V",
-            "net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/MCList;)V",
+            "net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/NonNullList;)V",
             "net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
             "net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
             //"net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I"
@@ -2822,7 +2822,7 @@ public class DefaultClientMappings extends MappingsBase {
                     "net/minecraft/item/Item",
                     "net/minecraft/creativetab/CreativeTabs",
                     "net/minecraft/util/EnumWorldBlockLayer",
-                    "net/minecraft/util/MCList"
+                    "net/minecraft/util/NonNullList"
             })
     public boolean processBlockClass() {
         ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
@@ -2835,7 +2835,7 @@ public class DefaultClientMappings extends MappingsBase {
         ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
         ClassNode creativeTabs = getClassNodeFromMapping("net/minecraft/creativetab/CreativeTabs");
         ClassNode enumWorldBlockLayer = getClassNodeFromMapping("net/minecraft/util/EnumWorldBlockLayer");
-        ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
+        ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/NonNullList");
         if (!MeddleUtil.notNull(block, iBlockAccess, blockPos, world, aabb, enumFacing, item, creativeTabs,
                 enumWorldBlockLayer, mcList)) return false;
 
@@ -2882,7 +2882,7 @@ public class DefaultClientMappings extends MappingsBase {
         // public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
         methods = getMatchingMethods(block, null, assembleDescriptor("(", item, creativeTabs, mcList, ")V"));
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/MCList;)V",
+            addMethodMapping("net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/NonNullList;)V",
                     block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 

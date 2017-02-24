@@ -4163,7 +4163,7 @@ public class DefaultSharedMappings extends MappingsBase {
 
     @Mapping(provides = {
             "net/minecraft/inventory/Slot",
-            "net/minecraft/inventory/EnumContainerAction"
+            "net/minecraft/inventory/ClickType"
     },
             providesFields = {
                     "net/minecraft/inventory/Container inventorySlots Ljava/util/List;",
@@ -4176,7 +4176,7 @@ public class DefaultSharedMappings extends MappingsBase {
                     "net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V",
                     "net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot;",
                     "net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z",
-                    "net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/EnumContainerAction;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
+                    "net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/ClickType;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
                     "net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V",
                     "net/minecraft/inventory/Container onCraftMatrixChanged (Lnet/minecraft/inventory/IInventory;)V",
                     "net/minecraft/inventory/Container detectAndSendChanges ()V",
@@ -4285,8 +4285,8 @@ public class DefaultSharedMappings extends MappingsBase {
         if (methods.size() == 1) {
             String containerAction = Type.getMethodType(methods.get(0).desc).getArgumentTypes()[2].getClassName();
             if (searchConstantPoolForStrings(containerAction, "PICKUP", "QUICK_CRAFT")) {
-                addClassMapping("net/minecraft/inventory/EnumContainerAction", containerAction);
-                addMethodMapping("net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/EnumContainerAction;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
+                addClassMapping("net/minecraft/inventory/ClickType", containerAction);
+                addMethodMapping("net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/ClickType;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
                         container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
             }
         }
@@ -4348,7 +4348,7 @@ public class DefaultSharedMappings extends MappingsBase {
 
 
     @Mapping(providesMethods = {
-            "net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Lnet/minecraft/util/MCList;)V",
+            "net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Lnet/minecraft/util/NonNullList;)V",
             "net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V",
             "net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V",
             "net/minecraft/inventory/ICrafting sendAllWindowProperties (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V"
@@ -4358,21 +4358,21 @@ public class DefaultSharedMappings extends MappingsBase {
                     "net/minecraft/inventory/Container",
                     "net/minecraft/item/ItemStack",
                     "net/minecraft/inventory/IInventory",
-                    "net/minecraft/util/MCList"
+                    "net/minecraft/util/NonNullList"
             })
     public boolean processICraftingClass() {
         ClassNode iCrafting = getClassNodeFromMapping("net/minecraft/inventory/ICrafting");
         ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
         ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
-        ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
+        ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/NonNullList");
         if (!MeddleUtil.notNull(iCrafting, container, itemStack, iInventory)) return false;
 
         // void updateCraftingInventory(Container containerToSend, MCList itemsList);
         // 16w32? java list change to MCList
         List<MethodNode> methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";L" + mcList.name + ";)V");
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Lnet/minecraft/util/MCList;)V",
+            addMethodMapping("net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Lnet/minecraft/util/NonNullList;)V",
                     iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 
@@ -8051,7 +8051,7 @@ public class DefaultSharedMappings extends MappingsBase {
             "net/minecraft/inventory/InventoryBasic slotsCount I",
             "net/minecraft/inventory/InventoryBasic inventoryTitle Ljava/lang/String;",
             "net/minecraft/inventory/InventoryBasic hasCustomName Z",
-            "net/minecraft/inventory/InventoryBasic inventoryContent Lnet/minecraft/util/MCList;"
+            "net/minecraft/inventory/InventoryBasic inventoryContent Lnet/minecraft/util/NonNullList;"
     },
             providesMethods = {
                     "net/minecraft/inventory/IInventory getSizeInventory ()I",
@@ -8073,14 +8073,14 @@ public class DefaultSharedMappings extends MappingsBase {
                     "net/minecraft/inventory/InventoryBasic",
                     "net/minecraft/item/ItemStack",
                     "net/minecraft/entity/player/EntityPlayer",
-                    "net/minecraft/util/MCList"
+                    "net/minecraft/util/NonNullList"
             })
     public boolean processInventoryBasicClass() {
         ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
         ClassNode inventoryBasic = getClassNodeFromMapping("net/minecraft/inventory/InventoryBasic");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
         ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
-        ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
+        ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/NonNullList");
         if (!MeddleUtil.notNull(iInventory, inventoryBasic, itemStack, entityPlayer, mcList)) return false;
 
         String slotsCountField = null;
@@ -8112,7 +8112,7 @@ public class DefaultSharedMappings extends MappingsBase {
         // 16w32? changed java list to MCList
         fields = getMatchingFields(inventoryBasic, null, "L" + mcList.name + ";");
         if (fields.size() == 1) {
-            addFieldMapping("net/minecraft/inventory/InventoryBasic inventoryContent Lnet/minecraft/util/MCList;",
+            addFieldMapping("net/minecraft/inventory/InventoryBasic inventoryContent Lnet/minecraft/util/NonNullList;",
                     inventoryBasic.name + " " + fields.get(0).name + " " + fields.get(0).desc);
         }
 
@@ -8772,7 +8772,7 @@ public class DefaultSharedMappings extends MappingsBase {
             providesFields = {
                     "net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;",
                     "net/minecraft/item/ItemStack animationsToGo I",
-                    "net/minecraft/item/ItemStack NULL_STACK Lnet/minecraft/item/ItemStack;",
+                    "net/minecraft/item/ItemStack EMPTY Lnet/minecraft/item/ItemStack;",
                     "net/minecraft/item/ItemStack validStack Z"
             },
             dependsMethods = {
@@ -8998,7 +8998,7 @@ public class DefaultSharedMappings extends MappingsBase {
 
         fields = getMatchingFields(itemStack, null, "L" + itemStack.name + ";");
         if (fields.size() == 1) {
-            addFieldMapping("net/minecraft/item/ItemStack NULL_STACK Lnet/minecraft/item/ItemStack;",
+            addFieldMapping("net/minecraft/item/ItemStack EMPTY Lnet/minecraft/item/ItemStack;",
                     itemStack.name + " " + fields.get(0).name + " " + fields.get(0).desc);
         }
 
@@ -9275,14 +9275,14 @@ public class DefaultSharedMappings extends MappingsBase {
 
     @Mapping(provides = {
             "net/minecraft/inventory/InventoryCrafting",
-            "net/minecraft/util/MCList"
+            "net/minecraft/util/NonNullList"
     },
             providesMethods = {
                     "net/minecraft/item/crafting/IRecipe getRecipeSize ()I",
                     "net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;",
                     "net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
                     "net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;",
-                    "net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;"
+                    "net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/NonNullList;"
             },
             depends = {
                     "net/minecraft/item/crafting/IRecipe",
@@ -9348,8 +9348,8 @@ public class DefaultSharedMappings extends MappingsBase {
         }
         if (methods.size() == 1) {
             String returnType = Type.getReturnType(methods.get(0).desc).getClassName();
-            addClassMapping("net/minecraft/util/MCList", returnType);
-            addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;",
+            addClassMapping("net/minecraft/util/NonNullList", returnType);
+            addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/NonNullList;",
                     iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 

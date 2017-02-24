@@ -36,6 +36,7 @@ public class ClassStringMapper extends MappingsBase {
         put(new String[]{"commands.generic.player.unspecified", "commands.tellraw.jsonException", "setLenient"}, "command/CommandBase");
         put(new String[]{"invulnerable", "flying", "mayfly", "instabuild"}, "entity/player/PlayerCapabilities");
         put(new String[]{"Using ARB_multitexture.\n", "Using GL 1.3 multitexturing.\n", "Using ARB_texture_env_combine.\n"}, "client/renderer/OpenGlHelper");
+        put(new String[]{"Tried to read NBT tag that was too big; tried to allocate: ", "bytes where max allowed: "}, "nbt/NBTSizeTracker");
     }};
 
     @Mapping
