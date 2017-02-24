@@ -1,6 +1,5 @@
 package de.canitzp.snapmap;
 
-import com.google.common.collect.Lists;
 import de.canitzp.snapmap.mappings.*;
 import net.fybertech.dynamicmappings.AccessUtil;
 import net.fybertech.dynamicmappings.DynamicMappings;
@@ -39,6 +38,8 @@ public class SnapMap implements ITweaker {
         addMapperClass(Common.class);
         addMapperClass(Client.class);
         addMapperClass(ClassStringMapper.class);
+        addMapperClass(FieldRemapper.class);
+        addMapperClass(MethodRemapper.class);
     }
 
     @Override
@@ -48,7 +49,6 @@ public class SnapMap implements ITweaker {
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader launchClassLoader) {
-
     }
 
     @Override
@@ -79,7 +79,7 @@ public class SnapMap implements ITweaker {
         if (mcJar != null) {
             DynamicRemap.remapUnknownChildren(mcJar, "net/minecraft/block/Block", "net/minecraft/item/Item", "net/minecraft/entity/monster/EntityMob",
                     "net/minecraft/entity/Entity", "net/minecraft/tileentity/TileEntity", "net/minecraft/inventory/Container",
-                    "net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase");
+                    "net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase", "net/minecraft/command/CommandBase");
         }
 
         DynamicRemap remapper = new DynamicRemap(
@@ -122,7 +122,7 @@ public class SnapMap implements ITweaker {
                 }
 
                 accessUtil.transformDeobfuscatedClass(mapped);
-                ClassWriter writer = new ClassWriter(0);
+                ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
                 mapped.accept(writer);
                 name = mapped.name + ".class";
                 bytes = writer.toByteArray();
@@ -144,11 +144,6 @@ public class SnapMap implements ITweaker {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static List<String> getAllUnmappedClasses(){
-        List<String> ret = new ArrayList<>();
-        return ret;
     }
 
 }

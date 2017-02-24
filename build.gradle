@@ -3,6 +3,13 @@ apply from: 'meddle.gradle'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+version = "1.0.0"
+group = "de.canitzp.snapmap"
+
+if(hasProperty('buildnumber')){
+    version = "${version}-${this.properties['buildnumber']}"
+}
+
 mod {
     id = 'snapmap'
     version = '1.0.0'
@@ -25,4 +32,50 @@ meddleapi {
 
 dynamicmappings {
     version = "028"
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    from sourceSets.main.java
+    classifier = 'dev'
+}
+
+task apiJar(type: Jar) {
+    from sourceSets.main.output
+    from sourceSets.main.java
+    classifier = 'api'
+    include 'de/canitzp/snapmap/api/**'
+}
+
+javadoc {
+    include 'de/canitzp/snapmap/api/**'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from 'build/docs/javadoc'
+    classifier 'javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.java
+    classifier = 'sources'
+}
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifact apiJar
+            artifact javadocJar
+            artifact sourcesJar
+            artifact deobfJar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///srv/nginx/maven"
+        }
+    }
 }
