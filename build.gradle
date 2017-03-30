@@ -19,7 +19,7 @@ mod {
 }
 
 minecraft {
-    version = '17w06a'
+    version = '17w13a'
 }
 
 meddle {

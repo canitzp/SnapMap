@@ -3010,8 +3010,8 @@ public class DefaultClientMappings extends MappingsBase {
                     "net/minecraft/client/gui/GuiSlot elementClicked (IZII)V",
                     "net/minecraft/client/gui/GuiSlot isSelected (I)Z",
                     "net/minecraft/client/gui/GuiSlot drawBackground ()V",
-                    "net/minecraft/client/gui/GuiSlot drawSlot (IIIIII)V",
-                    "net/minecraft/client/gui/GuiSlot func_178040_a (III)V",
+                    "net/minecraft/client/gui/GuiSlot drawSlot (IIIIIIF)V",
+                    "net/minecraft/client/gui/GuiSlot updateItemPos (IIIF)V",
                     "net/minecraft/client/gui/GuiListExtended getListEntry (I)Lnet/minecraft/client/gui/GuiListExtended$IGuiListEntry;",
                     "net/minecraft/client/gui/GuiListExtended mouseClicked (III)Z",
                     "net/minecraft/client/gui/GuiListExtended mouseReleased (III)Z"
@@ -3048,18 +3048,18 @@ public class DefaultClientMappings extends MappingsBase {
         }
 
 
-        // protected void drawSlot(int entryID, int p_180791_2_, int p_180791_3_, int p_180791_4_, int mouseXIn, int mouseYIn)
-        methods = getMatchingMethods(guiListExtended, null, "(IIIIII)V");
+        // protected void drawSlot(int entryID, int p_180791_2_, int p_180791_3_, int p_180791_4_, int mouseXIn, int mouseYIn, float unknown)
+        methods = getMatchingMethods(guiListExtended, null, "(IIIIIIF)V");
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/client/gui/GuiSlot drawSlot (IIIIII)V",
+            addMethodMapping("net/minecraft/client/gui/GuiSlot drawSlot (IIIIIIF)V",
                     guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 
 
-        // protected void func_178040_a(int p_178040_1_, int p_178040_2_, int p_178040_3_)
-        methods = getMatchingMethods(guiListExtended, null, "(III)V");
+        // protected void updateItemPos(int p_178040_1_, int p_178040_2_, int p_178040_3_, float unknown)
+        methods = getMatchingMethods(guiListExtended, null, "(IIIF)V");
         if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/client/gui/GuiSlot func_178040_a (III)V",
+            addMethodMapping("net/minecraft/client/gui/GuiSlot updateItemPos (IIIF)V",
                     guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
         }
 

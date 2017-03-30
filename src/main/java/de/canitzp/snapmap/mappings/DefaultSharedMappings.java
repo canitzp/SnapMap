@@ -12,12 +12,14 @@ import org.objectweb.asm.tree.*;
 
 import java.util.*;
 
+import static de.canitzp.snapmap.mappings.ClassNames.*;
+
 /**
  * This is the default SharedMappings class out of DynamicMappings, but with changes to avoid all errors
  *
  * @author FyberOptic
  */
-public class DefaultSharedMappings extends MappingsBase {
+public class DefaultSharedMappings extends CustomMappingBase {
 
 
     public static int argCount(String methodDesc) {
@@ -9034,166 +9036,29 @@ public class DefaultSharedMappings extends MappingsBase {
     }
 
 
-    @Mapping(provides = {
-            "net/minecraft/item/crafting/CraftingManager",
-            "net/minecraft/entity/passive/EntityAnimal",
-            "net/minecraft/item/EnumDyeColor"
-    },
-            depends = {
-                    "net/minecraft/entity/passive/EntitySheep"
-            })
-    public boolean getCraftingManagerClass() {
-        ClassNode entitySheep = getClassNodeFromMapping("net/minecraft/entity/passive/EntitySheep");
-        if (entitySheep == null) return false;
-
-        List<MethodNode> methods = new ArrayList<MethodNode>();
-
-        // Looking for: private EnumDyeColor func_175511_a(EntityAnimal, EntityAnimal)
-        for (MethodNode method : entitySheep.methods) {
-            if (!checkMethodParameters(method, Type.OBJECT, Type.OBJECT)) continue;
-            Type t = Type.getMethodType(method.desc);
-            Type[] args = t.getArgumentTypes();
-            String className = args[0].getClassName();
-            if (className.equals(args[1].getClassName()) && className.equals(entitySheep.superName))
-                methods.add(method);
-        }
-
-        MethodNode func_175511_a = null;
-        if (methods.size() == 1) func_175511_a = methods.get(0);
-        else return false;
-
-        if (searchConstantPoolForStrings(entitySheep.superName, "InLove"))
-            addClassMapping("net/minecraft/entity/passive/EntityAnimal", entitySheep.superName);
-
-        String enumDyeColor_name = Type.getMethodType(func_175511_a.desc).getReturnType().getClassName();
-        if (searchConstantPoolForStrings(enumDyeColor_name, "white", "lime"))
-            addClassMapping("net/minecraft/item/EnumDyeColor", enumDyeColor_name);
-
-
-        for (AbstractInsnNode insn = func_175511_a.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-            if (insn.getOpcode() != Opcodes.INVOKESTATIC) continue;
-            MethodInsnNode mn = (MethodInsnNode) insn;
-
-            if (mn.desc.equals("()L" + mn.owner + ";")) {
-                if (searchConstantPoolForStrings(mn.owner, "###", "AAA")) {
-                    addClassMapping("net/minecraft/item/crafting/CraftingManager", mn.owner);
-                    return true;
+    @Mapping(
+            depends = {ENTITY_SHEEP},
+            provides = {CRAFTING_MANAGER, ENTITY_ANIMAL, ENUM_DYE_COLOR}
+            )
+    public void getCraftingManagerClass() {
+        ClassNode sheepClass = getClassNodeFromMapping(ENTITY_SHEEP);
+        if(MeddleUtil.notNull(sheepClass)){
+            List<MethodNode> methods = getMatchingMethods(sheepClass, Opcodes.ACC_PRIVATE, Type.OBJECT, Type.OBJECT, Type.OBJECT);
+            if(methods.size() == 1){
+                addClassMapping(ENUM_DYE_COLOR, Type.getReturnType(methods.get(0).desc).getClassName());
+                addClassMapping(ENTITY_ANIMAL, Type.getArgumentTypes(methods.get(0).desc)[0].getClassName());
+                for(AbstractInsnNode node : methods.get(0).instructions.toArray()){
+                    if(node.getOpcode() == Opcodes.INVOKESTATIC){
+                        MethodInsnNode methodNode = (MethodInsnNode) node;
+                        addClassMapping(CRAFTING_MANAGER, methodNode.owner);
+                        break;
+                    }
                 }
             }
         }
-
-        return false;
     }
 
-
-    @Mapping(provides = {
-            "net/minecraft/item/crafting/ShapedRecipes",
-            "net/minecraft/item/crafting/IRecipe",
-            "net/minecraft/item/crafting/ShapelessRecipes"
-    },
-            providesMethods = {
-                    "net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes;",
-                    "net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V",
-                    "net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/crafting/CraftingManager;",
-                    "net/minecraft/item/crafting/CraftingManager getRecipeList ()Ljava/util/List;",
-                    "net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V"
-            },
-            depends = {
-                    "net/minecraft/item/crafting/CraftingManager",
-                    "net/minecraft/item/ItemStack"
-            })
-    public boolean processCraftingManagerClass() {
-        ClassNode craftingManager = getClassNodeFromMapping("net/minecraft/item/crafting/CraftingManager");
-        ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
-        if (craftingManager == null || itemStack == null) return false;
-
-        List<MethodNode> methods = new ArrayList<MethodNode>();
-
-        // public ShapedRecipes addRecipe(ItemStack param0, Object... param1)
-        for (MethodNode method : craftingManager.methods) {
-            if (method.desc.startsWith("(L" + itemStack.name + ";[Ljava/lang/Object;)L"))
-                methods.add(method);
-        }
-        if (methods.size() != 1) return false;
-
-        String shapedRecipes_className = Type.getMethodType(methods.get(0).desc).getReturnType().getClassName();
-        addClassMapping("net/minecraft/item/crafting/ShapedRecipes", shapedRecipes_className);
-
-        addMethodMapping("net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes;",
-                craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-
-
-        // public static CraftingManager getInstance()
-        methods = getMatchingMethods(craftingManager, null, "()L" + craftingManager.name + ";");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/crafting/CraftingManager;",
-                    craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-
-        // public List getRecipeList()
-        methods = getMatchingMethods(craftingManager, null, "()Ljava/util/List;");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/item/crafting/CraftingManager getRecipeList ()Ljava/util/List;",
-                    craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-
-        // public void addRecipe(IRecipe recipe)
-        // net/minecraft/item/crafting/IRecipe
-        String iRecipe_name = null;
-        methods.clear();
-        for (MethodNode method : craftingManager.methods) {
-            if (!method.desc.startsWith("(L") || !method.desc.endsWith(";)V")) continue;
-            Type[] args = Type.getMethodType(method.desc).getArgumentTypes();
-            if (args.length != 1) continue;
-            methods.add(method);
-        }
-        if (methods.size() == 1) {
-            MethodNode method = methods.get(0);
-            iRecipe_name = Type.getMethodType(method.desc).getArgumentTypes()[0].getClassName();
-            ClassNode iRecipe = getClassNode(iRecipe_name);
-            if ((iRecipe.access & Opcodes.ACC_INTERFACE) != 0) { // TODO: Better detection couldn't hurt
-                addClassMapping("net/minecraft/item/crafting/IRecipe", iRecipe_name);
-
-                addMethodMapping("net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V",
-                        craftingManager.name + " " + method.name + " " + method.desc);
-            } else iRecipe_name = null;
-        }
-
-
-        // public void addShapelessRecipe(ItemStack param0, Object... param1)
-        // net/minecraft/item/crafting/ShapelessRecipes
-        methods = getMatchingMethods(craftingManager, null, "(L" + itemStack.name + ";[Ljava/lang/Object;)V");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V",
-                    craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-
-            if (iRecipe_name != null) {
-                List<TypeInsnNode> nodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), TypeInsnNode.class);
-                for (Iterator<TypeInsnNode> it = nodes.iterator(); it.hasNext(); ) {
-                    TypeInsnNode tn = it.next();
-                    if (tn.getOpcode() != Opcodes.NEW || tn.desc.startsWith("java/") || tn.desc.equals(itemStack.name)) {
-                        it.remove();
-                        continue;
-                    }
-                    ClassNode cn = getClassNode(tn.desc);
-                    if (!classHasInterfaces(cn, iRecipe_name)) {
-                        it.remove();
-                        continue;
-                    }
-                }
-                if (nodes.size() == 1) {
-                    addClassMapping("net/minecraft/item/crafting/ShapelessRecipes", nodes.get(0).desc);
-                }
-            }
-        }
-
-
-        return true;
-    }
-
-
+    /*
     @Mapping(providesFields = {
             "net/minecraft/item/crafting/ShapedRecipes recipeWidth I",
             "net/minecraft/item/crafting/ShapedRecipes recipeHeight I",
@@ -9202,9 +9067,10 @@ public class DefaultSharedMappings extends MappingsBase {
             "net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z"
     },
             depends = {
-                    "net/minecraft/item/crafting/ShapedRecipes",
-                    "net/minecraft/item/ItemStack"
+                    SHAPED_RECIPE,
+                    ITEM_STACK
             })
+    @Deprecated
     public boolean processShapedRecipesClass() {
         ClassNode shapedRecipes = getClassNodeFromMapping("net/minecraft/item/crafting/ShapedRecipes");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
@@ -9246,9 +9112,10 @@ public class DefaultSharedMappings extends MappingsBase {
             "net/minecraft/item/crafting/ShapelessRecipes recipeItems Ljava/util/List;"
     },
             depends = {
-                    "net/minecraft/item/crafting/ShapelessRecipes",
-                    "net/minecraft/item/ItemStack"
+                    SHAPELESS_RECIPE,
+                    ITEM_STACK
             })
+    @Deprecated
     public boolean processShapelessRecipesClass() {
         ClassNode shapelessRecipes = getClassNodeFromMapping("net/minecraft/item/crafting/ShapelessRecipes");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
@@ -9271,98 +9138,11 @@ public class DefaultSharedMappings extends MappingsBase {
 
         return true;
     }
-
-
-    @Mapping(provides = {
-            "net/minecraft/inventory/InventoryCrafting",
-            "net/minecraft/util/NonNullList"
-    },
-            providesMethods = {
-                    "net/minecraft/item/crafting/IRecipe getRecipeSize ()I",
-                    "net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;",
-                    "net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
-                    "net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;",
-                    "net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/NonNullList;"
-            },
-            depends = {
-                    "net/minecraft/item/crafting/IRecipe",
-                    "net/minecraft/item/ItemStack",
-                    "net/minecraft/world/World"
-            })
-    public boolean processIRecipeClass() {
-        ClassNode iRecipe = getClassNodeFromMapping("net/minecraft/item/crafting/IRecipe");
-        ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
-        ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
-        if (!MeddleUtil.notNull(iRecipe, itemStack, world)) return false;
-
-        // int getRecipeSize();
-        List<MethodNode> methods = getMatchingMethods(iRecipe, null, "()I");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/item/crafting/IRecipe getRecipeSize ()I",
-                    iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-        // ItemStack getRecipeOutput();
-        methods = getMatchingMethods(iRecipe, null, "()L" + itemStack.name + ";");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;",
-                    iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-        // boolean matches(InventoryCrafting inv, World worldIn);
-        // net/minecraft/inventory/InventoryCrafting
-        methods.clear();
-        for (MethodNode method : iRecipe.methods) {
-            if (method.desc.startsWith("(L") && method.desc.endsWith(";L" + world.name + ";)Z")
-                    && Type.getMethodType(method.desc).getArgumentTypes().length == 2) methods.add(method);
-        }
-        String inventoryCrafting_name = null;
-        if (methods.size() == 1) {
-            MethodNode method = methods.get(0);
-            Type t = Type.getMethodType(method.desc);
-            inventoryCrafting_name = t.getArgumentTypes()[0].getClassName();
-            if (searchConstantPoolForStrings(inventoryCrafting_name, "container.crafting")) {
-                addClassMapping("net/minecraft/inventory/InventoryCrafting", inventoryCrafting_name);
-                addMethodMapping("net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
-                        iRecipe.name + " " + method.name + " " + method.desc);
-            } else inventoryCrafting_name = null;
-        }
-
-        if (inventoryCrafting_name == null) return false;
-
-
-        // ItemStack getCraftingResult(InventoryCrafting inv);
-        methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)L" + itemStack.name + ";");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;",
-                    iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-        // public MCList<ItemStack> getRemainingItems(InventoryCrafting paramInventoryCrafting);
-        // 16w32a changed output array to new "MCList" class for some reason
-        methods = getMatchingMethods(iRecipe, null, null);
-        for (Iterator<MethodNode> it = methods.iterator(); it.hasNext(); ) {
-            MethodNode method = it.next();
-            if (method.desc.startsWith("(L" + inventoryCrafting_name + ";)") && !method.desc.endsWith(itemStack.name + ";")) {
-            } else it.remove();
-        }
-        if (methods.size() == 1) {
-            String returnType = Type.getReturnType(methods.get(0).desc).getClassName();
-            addClassMapping("net/minecraft/util/NonNullList", returnType);
-            addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/NonNullList;",
-                    iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-
-        return true;
-    }
-
+    */
 
     @Mapping(provides = {
             "net/minecraft/init/Items"
     },
-            providesMethods = {
-            },
             depends = {
                     "net/minecraft/entity/passive/EntityVillager",
                     "net/minecraft/item/Item"
@@ -11096,6 +10876,79 @@ public class DefaultSharedMappings extends MappingsBase {
         return true;
     }
 
+
+    /**
+     * REWORKED METHODS
+     */
+
+    @Mapping(
+            depends = {ITEM, CREATIVE_TABS},
+            provides = {NON_NULL_LIST}
+    )
+    public void findNonNullList(){
+        ClassNode itemClass = getClassNodeFromMapping(ITEM);
+        ClassNode creativeTabsClass = getClassNodeFromMapping(CREATIVE_TABS);
+        if(MeddleUtil.notNull(itemClass, creativeTabsClass)){
+            List<MethodNode> methods = getMatchingMethods(itemClass, Opcodes.ACC_PUBLIC, Type.VOID, Type.OBJECT, Type.OBJECT, Type.OBJECT);
+            for(MethodNode method : methods){
+                if(Objects.equals(Type.getArgumentTypes(method.desc)[0].getClassName(), itemClass.name)){
+                    addClassMapping(NON_NULL_LIST, Type.getArgumentTypes(method.desc)[2].getClassName());
+                }
+            }
+        }
+    }
+
+    @Mapping(
+            depends = {CRAFTING_MANAGER, RESOURCE_LOCATION},
+            provides = {RECIPE_BASE, SHAPED_RECIPE, SHAPELESS_RECIPE},
+            providesMethods = {CRAFTING_MANAGER + " processJSON (L" + RESOURCE_LOCATION + ";Lcom/google/gson/JsonObject;)L" + RECIPE_BASE + ";",
+                                CRAFTING_MANAGER + " addRecipe (L" + RECIPE_BASE + ";)V",
+                                CRAFTING_MANAGER + " getInstance ()L" + CRAFTING_MANAGER + ";",
+                                CRAFTING_MANAGER + " getRecipeList ()Ljava/util/Map;"},
+            providesFields = {CRAFTING_MANAGER + " RECIPE_LIST Ljava/util/Map;"}
+    )
+    public void processCraftingManager(){
+        ClassNode craftingManagerClass = getClassNodeFromMapping(CRAFTING_MANAGER);
+        ClassNode resourceLocationClass = getClassNodeFromMapping(RESOURCE_LOCATION);
+        if(MeddleUtil.notNull(craftingManagerClass, resourceLocationClass)){
+            List<MethodNode> methods = getMatchingMethods(craftingManagerClass, Opcodes.ACC_PRIVATE, Type.OBJECT, Type.OBJECT, Type.OBJECT);
+            if(methods.size() == 1){
+                ClassNode recipeBaseClass = getClassNode(Type.getReturnType(methods.get(0).desc).getClassName());
+                addClassMapping(RECIPE_BASE, recipeBaseClass);
+                addMethodMapping(craftingManagerClass, "processJSON", "(L" + RESOURCE_LOCATION + ";Lcom/google/gson/JsonObject;)L" + RECIPE_BASE + ";", methods.get(0));
+                boolean second = false;
+                for(AbstractInsnNode node : methods.get(0).instructions.toArray()){
+                    if(node.getOpcode() == Opcodes.INVOKESTATIC && node.getNext().getOpcode() != Opcodes.ASTORE){
+                        MethodInsnNode methodNode = (MethodInsnNode) node;
+                        if(!second){
+                            addClassMapping(SHAPED_RECIPE, methodNode.owner);
+                            second = true;
+                        } else {
+                            addClassMapping(SHAPELESS_RECIPE, methodNode.owner);
+                            break;
+                        }
+                    }
+                }
+            }
+            methods = getMatchingMethods(craftingManagerClass, Opcodes.ACC_PUBLIC, Type.VOID, Type.OBJECT);
+            if(methods.size() == 1){
+                addMethodMapping(craftingManagerClass, "addRecipe", "(L" + RECIPE_BASE + ";)V", methods.get(0));
+            }
+            //addFieldMappingIfSingle(craftingManagerClass, "INSTANCE", );
+            List<FieldNode> fields = getMatchingFields(craftingManagerClass, null, "L" + CRAFTING_MANAGER + ";");
+            if(fields.size() == 1){
+                addFieldMapping(craftingManagerClass, "INSTANCE", "L" + craftingManagerClass.name + ";", fields.get(0));
+            }
+            methods = getMatchingMethods(craftingManagerClass, (Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC), Type.OBJECT);
+            for(MethodNode method : methods){
+                if(method.instructions.size() == 4){
+                    addMethodMapping(craftingManagerClass, "getInstance", "()L" + CRAFTING_MANAGER + ";", methods.get(0));
+                }
+            }
+            addFieldMappingIfSingle(craftingManagerClass, "RECIPE_LIST", "Ljava/util/Map;");
+            addMethodIfSingle(craftingManagerClass, "getRecipeList", "()Ljava/util/Map;");
+        }
+    }
 }
 
 

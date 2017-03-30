@@ -13,13 +13,14 @@ import org.objectweb.asm.tree.MethodNode;
 
 import java.util.*;
 
+import static de.canitzp.snapmap.mappings.ClassNames.*;
 /**
  * @author canitzp
  */
 public class CustomMappingBase extends MappingsBase {
 
     public void addFieldMapping(ClassNode owner, String name, String desc, FieldNode fieldNode){
-        this.addFieldMapping(owner.name + " " + name + " " + desc, owner.name + " " + fieldNode.name + " " + desc);
+        this.addFieldMapping(DynamicMappings.reverseClassMappings.get(owner.name) + " " + name + " " + desc, owner.name + " " + fieldNode.name + " " + desc);
     }
 
     public void addMethodMapping(ClassNode owner, String name, String desc, MethodNode method){
