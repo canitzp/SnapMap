@@ -19,3 +19,49 @@ dependencies {
     compile 'net.minecraft:launchwrapper:1.12'
     compile 'org.ow2.asm:asm-debug-all:5.2'
 }
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    from sourceSets.main.java
+    classifier = 'dev'
+}
+
+task apiJar(type: Jar) {
+    from sourceSets.main.output
+    from sourceSets.main.java
+    classifier = 'api'
+    include 'de/canitzp/snapmap/api/**'
+}
+
+javadoc {
+    include 'de/canitzp/snapmap/api/**'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from 'build/docs/javadoc'
+    classifier 'javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.java
+    classifier = 'sources'
+}
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifact apiJar
+            artifact javadocJar
+            artifact sourcesJar
+            artifact deobfJar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///srv/nginx/maven"
+        }
+    }
+}
