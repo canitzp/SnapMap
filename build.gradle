@@ -1,81 +1,21 @@
-apply from: 'meddle.gradle'
+group 'com.yourname.examplemod'
+version '1.0.0'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+apply plugin: 'java'
+apply plugin: 'idea'
 
-version = "1.0.0"
-group = "de.canitzp.snapmap"
+sourceCompatibility = 1.8
 
-if(hasProperty('buildnumber')){
-    version = "${version}-${this.properties['buildnumber']}"
-}
-
-mod {
-    id = 'snapmap'
-    version = '1.0.0'
-    
-    tweakClass = 'de.canitzp.snapmap.SnapMap'
-    //modClasses = 'net.fybertech.examplemod.ExampleMod'
-}
-
-minecraft {
-    version = '17w13a'
-}
-
-meddle {
-    version = "1.3"
-}
-
-meddleapi {
-    version = "1.0.7"
-}
-
-dynamicmappings {
-    version = "028"
-}
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    from sourceSets.main.java
-    classifier = 'dev'
-}
-
-task apiJar(type: Jar) {
-    from sourceSets.main.output
-    from sourceSets.main.java
-    classifier = 'api'
-    include 'de/canitzp/snapmap/api/**'
-}
-
-javadoc {
-    include 'de/canitzp/snapmap/api/**'
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    from 'build/docs/javadoc'
-    classifier 'javadoc'
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.java
-    classifier = 'sources'
-}
-
-apply plugin: 'maven-publish'
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-            artifact apiJar
-            artifact javadocJar
-            artifact sourcesJar
-            artifact deobfJar
-        }
+repositories {
+    mavenCentral()
+    maven {
+            url 'https://libraries.minecraft.net/'
     }
-    repositories {
-        maven {
-            url "file:///srv/nginx/maven"
-        }
-    }
+}
+
+dependencies {
+    compile fileTree(dir:'cache/libraries', include: '*.jar')
+    compile fileTree(dir: 'cache', include: '*.jar')
+    compile 'net.minecraft:launchwrapper:1.12'
+    compile 'org.ow2.asm:asm-debug-all:5.2'
 }

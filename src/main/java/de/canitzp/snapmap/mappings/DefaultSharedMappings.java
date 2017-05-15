@@ -1195,7 +1195,7 @@ public class DefaultSharedMappings extends CustomMappingBase {
 
     @Mapping(providesMethods = {
             "net/minecraft/block/Block setTickRandomly (Z)Lnet/minecraft/block/Block;",
-            "net/minecraft/block/Block isVisuallyOpaque ()Z",
+            //"net/minecraft/block/Block isVisuallyOpaque ()Z",
             "net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z"
     },
             depends = {
@@ -1230,9 +1230,11 @@ public class DefaultSharedMappings extends CustomMappingBase {
 
         // public boolean isVisuallyOpaque()
         List<MethodNode> methods = getMatchingMethods(blockLeaves, null, "()Z");
+        /*
         if (methods.size() == 1) {
             addMethodMapping("net/minecraft/block/Block isVisuallyOpaque ()Z", block.name + " " + methods.get(0).name + " ()Z");
         }
+        */
 
         //TODO move this into another method since it now uses BlockBarrier
         // public boolean isOpaqueCube(IBlockState state)
@@ -4295,10 +4297,10 @@ public class DefaultSharedMappings extends CustomMappingBase {
 
 
         // public void putStackInSlot(int p_75141_1_, ItemStack p_75141_2_)
+        // public void updateStackInSlotWith ?
         methods = getMatchingMethods(container, null, "(IL" + itemStack.name + ";)V");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V",
-                    container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+        for(MethodNode method : methods){
+            addMethodMapping(container, method.instructions.size() == 11 ? "putStackInSlot" : "updateStackInSlotWith", "(IL" + ITEM_STACK + ";)V", method);
         }
 
 
@@ -5562,8 +5564,7 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     "net/minecraft/block/Block onFallenUpon (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V",
                     "net/minecraft/entity/Entity fall (FF)V",
                     "net/minecraft/block/Block onLanded (Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;)V",
-                    "net/minecraft/block/Block damageDropped (Lnet/minecraft/block/state/IBlockState;)I",
-                    "net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
+                    "net/minecraft/block/Block damageDropped (Lnet/minecraft/block/state/IBlockState;)I"
             },
             depends = {
                     "net/minecraft/block/Block",
@@ -5797,16 +5798,6 @@ public class DefaultSharedMappings extends CustomMappingBase {
                 }
             }
         }
-
-
-        // public boolean isBlockSolid(IBlockAccess param0, BlockPos param1, EnumFacing param2)
-        methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockAccess, blockPos, enumFacing, ")Z"));
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
-                    block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-
         return true;
     }
 
@@ -5834,7 +5825,7 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     "net/minecraft/block/Block getStepSound ()Lnet/minecraft/block/BlockSoundType;",
                     "net/minecraft/block/Block getComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)I",
                     "net/minecraft/block/Block isEqualTo (Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z",
-                    "net/minecraft/block/Block isAssociatedBlock (Lnet/minecraft/block/Block;)Z",
+                    //"net/minecraft/block/Block isAssociatedBlock (Lnet/minecraft/block/Block;)Z",
                     "net/minecraft/block/Block canDropFromExplosion (Lnet/minecraft/world/Explosion;)Z",
                     "net/minecraft/block/Block fillWithRain (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V",
                     "net/minecraft/block/Block onBlockHarvested (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;)V",
@@ -7783,9 +7774,9 @@ public class DefaultSharedMappings extends CustomMappingBase {
                 TableSwitchInsnNode table = (TableSwitchInsnNode) insn;
 
                 // There's 12 NBT types, otherwise this table isn't reliable
-                if (table.labels.size() != 12) continue;
+                if (table.labels.size() != 13) continue;
 
-                for (int n = 0; n < 12; n++) {
+                for (int n = 0; n < 13; n++) {
                     AbstractInsnNode destInsn = table.labels.get(n);
                     AbstractInsnNode nextReal = getNextRealOpcode(destInsn);
 
@@ -7835,6 +7826,9 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     continue;
                 case 11:
                     addClassMapping("net/minecraft/nbt/NBTTagIntArray", className);
+                    continue;
+                case 12:
+                    addClassMapping("net/minecraft/nbt/NBTTagLongArray", className);
                     continue;
             }
         }
@@ -8008,9 +8002,11 @@ public class DefaultSharedMappings extends CustomMappingBase {
 
         // public String getString(String key)
         methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;)Ljava/lang/String;");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/nbt/NBTTagCompound getString (Ljava/lang/String;)Ljava/lang/String;",
-                    tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+        for(MethodNode node : methods){
+            if(node.access == Opcodes.ACC_PUBLIC){
+                addMethodMapping("net/minecraft/nbt/NBTTagCompound getString (Ljava/lang/String;)Ljava/lang/String;",
+                        tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+            }
         }
 
         // public void setString(String key, String value)
@@ -10127,8 +10123,8 @@ public class DefaultSharedMappings extends CustomMappingBase {
             "net/minecraft/block/Block blockHardness F"
     },
             providesMethods = {
-                    "net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material;",
-                    "net/minecraft/block/material/Material isSolid ()Z",
+                    //"net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material;",
+                    //"net/minecraft/block/material/Material isSolid ()Z",
                     "net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z",
                     "net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z",
                     "net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z",
@@ -10146,7 +10142,7 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     "net/minecraft/block/Block lightValue I"
             },
             dependsMethods = {
-                    "net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
+                    //"net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
                     "net/minecraft/block/Block setTickRandomly (Z)Lnet/minecraft/block/Block;",
                     "net/minecraft/block/Block setHardness (F)Lnet/minecraft/block/Block;"
             },
@@ -10187,7 +10183,7 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     block.name + " " + air_id_name + " L" + resourceLocation.name + ";");
         }
 
-
+        /*
         MethodNode isBlockSolid = getMethodNodeFromMapping(block, "net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z");
         if (isBlockSolid != null) {
             List<MethodInsnNode> nodes = getAllInsnNodesOfType(isBlockSolid, MethodInsnNode.class);
@@ -10208,7 +10204,7 @@ public class DefaultSharedMappings extends CustomMappingBase {
                         material.name + " " + isSolid.get(0).name + " " + isSolid.get(0).desc);
             }
         }
-
+        */
 
         FieldNode fullBlock = getFieldNodeFromMapping(block, "net/minecraft/block/Block fullBlock Z");
         FieldNode useNeighborBrightness = getFieldNodeFromMapping(block, "net/minecraft/block/Block useNeighborBrightness Z");
@@ -10882,10 +10878,26 @@ public class DefaultSharedMappings extends CustomMappingBase {
      */
 
     @Mapping(
-            depends = {ITEM, CREATIVE_TABS},
+            depends = {ENTITY_LIVING_BASE},
             provides = {NON_NULL_LIST}
     )
     public void findNonNullList(){
+        ClassNode entity = getClassNodeFromMapping(ENTITY_LIVING_BASE);
+        if(MeddleUtil.notNull(entity)){
+            List<String> fields = new ArrayList<>();
+            for(FieldNode field : entity.fields){
+                if(field.access == (Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL)){
+                    if(fields.contains(field.desc)){
+                        addClassMapping(NON_NULL_LIST, field.desc.substring(1, 3));
+                    } else {
+                        fields.add(field.desc);
+
+                    }
+                }
+            }
+        }
+
+        /*
         ClassNode itemClass = getClassNodeFromMapping(ITEM);
         ClassNode creativeTabsClass = getClassNodeFromMapping(CREATIVE_TABS);
         if(MeddleUtil.notNull(itemClass, creativeTabsClass)){
@@ -10895,27 +10907,25 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     addClassMapping(NON_NULL_LIST, Type.getArgumentTypes(method.desc)[2].getClassName());
                 }
             }
-        }
+        }*/
     }
 
     @Mapping(
-            depends = {CRAFTING_MANAGER, RESOURCE_LOCATION},
+            depends = {CRAFTING_MANAGER, RESOURCE_LOCATION, REGISTRY_NAMESPACED},
             provides = {RECIPE_BASE, SHAPED_RECIPE, SHAPELESS_RECIPE},
-            providesMethods = {CRAFTING_MANAGER + " processJSON (L" + RESOURCE_LOCATION + ";Lcom/google/gson/JsonObject;)L" + RECIPE_BASE + ";",
-                                CRAFTING_MANAGER + " addRecipe (L" + RECIPE_BASE + ";)V",
-                                CRAFTING_MANAGER + " getInstance ()L" + CRAFTING_MANAGER + ";",
-                                CRAFTING_MANAGER + " getRecipeList ()Ljava/util/Map;"},
-            providesFields = {CRAFTING_MANAGER + " RECIPE_LIST Ljava/util/Map;"}
+            providesMethods = {CRAFTING_MANAGER + " processJSON (Lcom/google/gson/JsonObject;)L" + RECIPE_BASE + ";",
+                                CRAFTING_MANAGER + " registerRecipeClass (L" + RESOURCE_LOCATION + ";L" + RECIPE_BASE + ";)V"},
+            providesFields = {CRAFTING_MANAGER + " RECIPE_TYPES L" + REGISTRY_NAMESPACED + ";"}
     )
     public void processCraftingManager(){
         ClassNode craftingManagerClass = getClassNodeFromMapping(CRAFTING_MANAGER);
         ClassNode resourceLocationClass = getClassNodeFromMapping(RESOURCE_LOCATION);
         if(MeddleUtil.notNull(craftingManagerClass, resourceLocationClass)){
-            List<MethodNode> methods = getMatchingMethods(craftingManagerClass, Opcodes.ACC_PRIVATE, Type.OBJECT, Type.OBJECT, Type.OBJECT);
+            List<MethodNode> methods = getMatchingMethods(craftingManagerClass, Opcodes.ACC_PRIVATE, Type.OBJECT, Type.OBJECT);
             if(methods.size() == 1){
                 ClassNode recipeBaseClass = getClassNode(Type.getReturnType(methods.get(0).desc).getClassName());
                 addClassMapping(RECIPE_BASE, recipeBaseClass);
-                addMethodMapping(craftingManagerClass, "processJSON", "(L" + RESOURCE_LOCATION + ";Lcom/google/gson/JsonObject;)L" + RECIPE_BASE + ";", methods.get(0));
+                addMethodMapping(craftingManagerClass, "processJSON", "(Lcom/google/gson/JsonObject;)L" + RECIPE_BASE + ";", methods.get(0));
                 boolean second = false;
                 for(AbstractInsnNode node : methods.get(0).instructions.toArray()){
                     if(node.getOpcode() == Opcodes.INVOKESTATIC && node.getNext().getOpcode() != Opcodes.ASTORE){
@@ -10930,23 +10940,12 @@ public class DefaultSharedMappings extends CustomMappingBase {
                     }
                 }
             }
-            methods = getMatchingMethods(craftingManagerClass, Opcodes.ACC_PUBLIC, Type.VOID, Type.OBJECT);
+            methods = getMatchingMethods(craftingManagerClass, Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, Type.VOID, Type.OBJECT, Type.OBJECT);
+            methods = cleanMethodsMap(methods, null, RESOURCE_LOCATION, RECIPE_BASE);
             if(methods.size() == 1){
-                addMethodMapping(craftingManagerClass, "addRecipe", "(L" + RECIPE_BASE + ";)V", methods.get(0));
+                addMethodMapping(craftingManagerClass, "registerRecipeClass", "(L" + RESOURCE_LOCATION + ";L" + RECIPE_BASE + ";)V", methods.get(0));
             }
-            //addFieldMappingIfSingle(craftingManagerClass, "INSTANCE", );
-            List<FieldNode> fields = getMatchingFields(craftingManagerClass, null, "L" + CRAFTING_MANAGER + ";");
-            if(fields.size() == 1){
-                addFieldMapping(craftingManagerClass, "INSTANCE", "L" + craftingManagerClass.name + ";", fields.get(0));
-            }
-            methods = getMatchingMethods(craftingManagerClass, (Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC), Type.OBJECT);
-            for(MethodNode method : methods){
-                if(method.instructions.size() == 4){
-                    addMethodMapping(craftingManagerClass, "getInstance", "()L" + CRAFTING_MANAGER + ";", methods.get(0));
-                }
-            }
-            addFieldMappingIfSingle(craftingManagerClass, "RECIPE_LIST", "Ljava/util/Map;");
-            addMethodIfSingle(craftingManagerClass, "getRecipeList", "()Ljava/util/Map;");
+            addFieldMappingIfSingle(craftingManagerClass, "RECIPE_TYPES", getClassNodeFromMapping(REGISTRY_NAMESPACED));
         }
     }
 }

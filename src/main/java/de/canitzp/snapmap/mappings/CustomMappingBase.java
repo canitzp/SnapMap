@@ -20,32 +20,32 @@ import static de.canitzp.snapmap.mappings.ClassNames.*;
 public class CustomMappingBase extends MappingsBase {
 
     public void addFieldMapping(ClassNode owner, String name, String desc, FieldNode fieldNode){
-        this.addFieldMapping(DynamicMappings.reverseClassMappings.get(owner.name) + " " + name + " " + desc, owner.name + " " + fieldNode.name + " " + desc);
+        this.addFieldMapping(DynamicMappings.reverseClassMappings.get(owner.name) + " " + name + " " + desc, owner.name + " " + fieldNode.name + " " + fieldNode.desc);
     }
 
-    public void addMethodMapping(ClassNode owner, String name, String desc, MethodNode method){
+    public void addMethodMapping(ClassNode owner, String name, String mappedDesc, MethodNode method){
         if(owner.superName != null){
             if(DynamicMappings.reverseClassMappings.containsKey(owner.superName)){
                 ClassNode cn = getClassNode(owner.superName);
                 for(MethodNode methodNode : cn.methods){
                     if(methodNode.name.equals(method.name) && methodNode.desc.equals(method.desc)){
-                        addMethodMapping(cn, name, desc, method);
+                        addMethodMapping(cn, name, mappedDesc, method);
                         return;
                     }
                 }
             }
         }
-        this.addMethodMapping(DynamicMappings.reverseClassMappings.get(owner.name) + " " + name + " " + desc, owner.name + " " + method.name + " " + method.desc);
+        this.addMethodMapping(DynamicMappings.reverseClassMappings.get(owner.name) + " " + name + " " + mappedDesc, owner.name + " " + method.name + " " + method.desc);
     }
 
     public void addFieldMappingIfSingle(ClassNode classNode, String unobfFieldName, ClassNode fieldType){
         this.addFieldMappingIfSingle(classNode, unobfFieldName, "L" + fieldType.name + ";");
     }
 
-    public void addFieldMappingIfSingle(ClassNode classNode, String unobfFieldName, String fieldDesc){
-        List<FieldNode> fieldNodes = getMatchingFields(classNode, null, fieldDesc);
+    public void addFieldMappingIfSingle(ClassNode classNode, String unobfFieldName, String obfFieldDesc){
+        List<FieldNode> fieldNodes = getMatchingFields(classNode, null, obfFieldDesc);
         if(fieldNodes.size() == 1){
-            addFieldMapping(classNode, unobfFieldName, fieldDesc, fieldNodes.get(0));
+            addFieldMapping(classNode, unobfFieldName, getMappedFieldDesc(obfFieldDesc), fieldNodes.get(0));
         }
     }
 
@@ -53,10 +53,10 @@ public class CustomMappingBase extends MappingsBase {
         return DynamicMappings.reverseMethodMappings.containsKey(classNode.name + " " + methodNode.name + " " + methodNode.desc);
     }
 
-    public void addMethodIfSingle(ClassNode classNode, String unobfMethodName, String methodDesc){
-        List<MethodNode> methodNodes = getMatchingMethods(classNode, null, methodDesc);
+    public void addMethodIfSingle(ClassNode classNode, String unobfMethodName, String obfDesc){
+        List<MethodNode> methodNodes = getMatchingMethods(classNode, null, obfDesc);
         if(methodNodes.size() == 1){
-            addMethodMapping(classNode, unobfMethodName, methodDesc, methodNodes.get(0));
+            addMethodMapping(classNode, unobfMethodName, obfDesc, methodNodes.get(0));
         }
     }
 
@@ -148,6 +148,36 @@ public class CustomMappingBase extends MappingsBase {
     public String getClassName(String deobfClass){
         String[] split = deobfClass.split("/");
         return split[split.length-1];
+    }
+
+    public String getMappedFieldDesc(String obfFieldDesc){
+        return "L" + DynamicMappings.reverseClassMappings.get(Type.getType(obfFieldDesc).getClassName()) + ";";
+    }
+
+    //TODO
+    public String getMappedMethodDesc(String obfMethodDesc){
+        return obfMethodDesc;
+    }
+
+    public List<MethodNode> cleanMethodsMap(List<MethodNode> oldMethods, String returnTypeMapped, String... parameterMapped){
+        List<MethodNode> newMethods = new ArrayList<>();
+        for(MethodNode method : oldMethods){
+            Type retType = Type.getReturnType(method.desc);
+            if(retType.getClassName().equals("void") || (returnTypeMapped != null && getMappedName(retType.getClassName()).equals(returnTypeMapped))){
+                Type[] params = Type.getArgumentTypes(method.desc);
+                boolean flag = true;
+                for (int i = 0; i < params.length; i++) {
+                    Type type = params[i];
+                    if (!getMappedName(type.getClassName()).equals(parameterMapped[i])){
+                        flag = false;
+                    }
+                }
+                if(flag){
+                    newMethods.add(method);
+                }
+            }
+        }
+        return newMethods;
     }
 
 }

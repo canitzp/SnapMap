@@ -62,8 +62,13 @@ public class SnapMap implements ITweaker {
         DynamicMappings.MAPPINGS_CLASSES.add(mapper.getName());
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws InterruptedException {
         File out = new File("cache/remapped-minecraft.jar");
+        if(out.exists()){
+            out.delete();
+            Thread.sleep(5000);
+        }
+
         new SnapMap();
 
         DynamicMappings.generateClassMappings();
@@ -118,7 +123,7 @@ public class SnapMap implements ITweaker {
                     mapped.sourceFile = sourceName + ".java";
                 }
 
-                accessUtil.transformDeobfuscatedClass(mapped);
+                //accessUtil.transformDeobfuscatedClass(mapped);
                 ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
                 mapped.accept(writer);
                 name = mapped.name + ".class";
