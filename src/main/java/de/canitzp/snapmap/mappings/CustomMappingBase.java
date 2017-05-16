@@ -180,4 +180,14 @@ public class CustomMappingBase extends MappingsBase {
         return newMethods;
     }
 
+    public List<MethodNode> findMethodsWithSignature(ClassNode node, String signature){
+        List<MethodNode> methods = new ArrayList<>();
+        for(MethodNode method : node.methods){
+            if(signature.equals(method.signature)){
+                methods.add(method);
+            }
+        }
+        return methods;
+    }
+
 }

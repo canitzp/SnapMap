@@ -1229,6 +1229,7 @@ public class DefaultClientMappings extends MappingsBase {
             },
             depends = {
                     "net/minecraft/client/gui/inventory/GuiContainer",
+                    "net/minecraft/client/gui/inventory/GuiChest",
                     "net/minecraft/inventory/Slot",
                     "net/minecraft/client/Minecraft",
                     "net/minecraft/client/entity/EntityPlayerSP",
@@ -1238,13 +1239,14 @@ public class DefaultClientMappings extends MappingsBase {
             })
     public boolean processGuiContainerClass() {
         ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
+        ClassNode chest = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiChest");
         ClassNode slot = getClassNodeFromMapping("net/minecraft/inventory/Slot");
         ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
         ClassNode playerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");
         ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
         ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
         ClassNode containerAction = getClassNodeFromMapping("net/minecraft/inventory/ClickType");
-        if (!MeddleUtil.notNull(guiContainer, slot, minecraft, playerSP, itemStack, guiScreen, containerAction))
+        if (!MeddleUtil.notNull(guiContainer, chest, slot, minecraft, playerSP, itemStack, guiScreen, containerAction))
             return false;
 
         // protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType)
@@ -1290,7 +1292,7 @@ public class DefaultClientMappings extends MappingsBase {
 
 
         // protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {}
-        methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(II)V");
+        methods = getMatchingMethods(chest, Opcodes.ACC_PROTECTED, Type.VOID, Type.INT, Type.INT);
         if (methods.size() == 1) {
             addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerForegroundLayer (II)V",
                     guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
@@ -1462,13 +1464,6 @@ public class DefaultClientMappings extends MappingsBase {
             "net/minecraft/network/play/server/S2DPacketOpenWindow windowTitle Lnet/minecraft/util/IChatComponent;",
             "net/minecraft/network/play/server/S2DPacketOpenWindow slotCount I"
     },
-            providesMethods = {
-                    "net/minecraft/network/play/server/S2DPacketOpenWindow getGuiId ()Ljava/lang/String;",
-                    "net/minecraft/network/play/server/S2DPacketOpenWindow getWindowTitle ()Lnet/minecraft/util/IChatComponent;",
-                    "net/minecraft/network/play/server/S2DPacketOpenWindow getWindowId ()I",
-                    "net/minecraft/network/play/server/S2DPacketOpenWindow getSlotCount ()I",
-                    "net/minecraft/network/play/server/S2DPacketOpenWindow hasSlots ()Z"
-            },
             depends = {
                     "net/minecraft/network/play/server/S2DPacketOpenWindow",
                     "net/minecraft/util/IChatComponent"
@@ -1514,54 +1509,6 @@ public class DefaultClientMappings extends MappingsBase {
             addFieldMapping("net/minecraft/network/play/server/S2DPacketOpenWindow windowTitle Lnet/minecraft/util/IChatComponent;", packet.name + " " + windowTitle + " L" + iChatComponent.name + ";");
             addFieldMapping("net/minecraft/network/play/server/S2DPacketOpenWindow slotCount I", packet.name + " " + slotCount + " I");
         }
-
-        // public String getGuiId()
-        methods = DynamicMappings.getMatchingMethods(packet, null, "()Ljava/lang/String;");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getGuiId ()Ljava/lang/String;",
-                    packet.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-        // public IChatComponent getWindowTitle()
-        methods = DynamicMappings.getMatchingMethods(packet, null, "()L" + iChatComponent.name + ";");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getWindowTitle ()Lnet/minecraft/util/IChatComponent;",
-                    packet.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
-
-        // public int getWindowId() - windowId
-        // public int getSlotCount() - slotCount
-        // public int getEntityId() - TODO
-        methods = DynamicMappings.getMatchingMethods(packet, null, "()I");
-        for (MethodNode method : methods) {
-            for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-                if (insn.getOpcode() != Opcodes.GETFIELD) continue;
-                FieldInsnNode fn = (FieldInsnNode) insn;
-                if (!fn.owner.equals(packet.name)) continue;
-
-                if (fn.name.equals(windowId)) {
-                    addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getWindowId ()I",
-                            packet.name + " " + method.name + " " + method.desc);
-                    break;
-                }
-
-                if (fn.name.equals(slotCount)) {
-                    addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getSlotCount ()I",
-                            packet.name + " " + method.name + " " + method.desc);
-                    break;
-                }
-            }
-        }
-
-
-        // public boolean hasSlots()
-        methods = DynamicMappings.getMatchingMethods(packet, null, "()Z");
-        if (methods.size() == 1) {
-            addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow hasSlots ()Z",
-                    packet.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-        }
-
         return true;
     }
 
@@ -2793,17 +2740,18 @@ public class DefaultClientMappings extends MappingsBase {
 	}
 	*/
 
+
     @Mapping(providesMethods = {
-            "net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I",
-            "net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
-            "net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
-            "net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V",
-            "net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/NonNullList;)V",
-            "net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
-            "net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
+            //"net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I",
+            //"net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+            //"net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
+            //"net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V",
+            //"net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/NonNullList;)V",
+            //"net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
+            //"net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
             //"net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I"
-            "net/minecraft/block/Block isTranslucent (Lnet/minecraft/block/state/IBlockState;)Z",
-            "net/minecraft/block/Block getAmbientOcclusionLightValue (Lnet/minecraft/block/state/IBlockState;)F"
+            //"net/minecraft/block/Block isTranslucent (Lnet/minecraft/block/state/IBlockState;)Z",
+            //"net/minecraft/block/Block getAmbientOcclusionLightValue (Lnet/minecraft/block/state/IBlockState;)F"
     },
             dependsMethods = {
                     "net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;"

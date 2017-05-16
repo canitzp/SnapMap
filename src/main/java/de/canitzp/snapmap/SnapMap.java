@@ -1,6 +1,9 @@
 package de.canitzp.snapmap;
 
 import de.canitzp.snapmap.mappings.*;
+import de.canitzp.snapmap.mappings.remap.CustomRemap;
+import de.canitzp.snapmap.mappings.specific.BlockMappings;
+import de.canitzp.snapmap.mappings.specific.PacketMappings;
 import net.fybertech.dynamicmappings.AccessUtil;
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.DynamicRemap;
@@ -33,6 +36,8 @@ public class SnapMap implements ITweaker {
         addMapperClass(DefaultClientMappings.class);
         addMapperClass(Common.class);
         addMapperClass(Client.class);
+        addMapperClass(PacketMappings.class);
+        addMapperClass(BlockMappings.class);
         addMapperClass(ClassStringMapper.class);
         addMapperClass(ClassRemapper.class);
         addMapperClass(MethodRemapper.class);
@@ -62,7 +67,7 @@ public class SnapMap implements ITweaker {
         DynamicMappings.MAPPINGS_CLASSES.add(mapper.getName());
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         File out = new File("cache/remapped-minecraft.jar");
         if(out.exists()){
             out.delete();
@@ -74,38 +79,27 @@ public class SnapMap implements ITweaker {
         DynamicMappings.generateClassMappings();
 
         AccessUtil accessUtil = new AccessUtil();
-        accessUtil.readAllTransformerConfigs();
+        //accessUtil.readAllTransformerConfigs();
 
-        JarFile mcJar = DynamicMappings.getMinecraftJar();
+        JarFile mcJar = new JarFile("cache/1.12-pre2.jar");//DynamicMappings.getMinecraftJar();
 
-        if (mcJar != null) {
-            DynamicRemap.remapUnknownChildren(mcJar, "net/minecraft/block/Block", "net/minecraft/item/Item", "net/minecraft/entity/monster/EntityMob",
-                    "net/minecraft/entity/Entity", "net/minecraft/tileentity/TileEntity", "net/minecraft/inventory/Container",
-                    "net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase", "net/minecraft/command/CommandBase");
-        }
+        DynamicRemap.remapUnknownChildren(mcJar, "net/minecraft/block/Block", "net/minecraft/item/Item", "net/minecraft/entity/monster/EntityMob",
+                "net/minecraft/entity/Entity", "net/minecraft/tileentity/TileEntity", "net/minecraft/inventory/Container",
+                "net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase", "net/minecraft/command/CommandBase");
 
-        DynamicRemap remapper = new DynamicRemap(
+        DynamicRemap remapper = new CustomRemap(
                 DynamicMappings.reverseClassMappings,
                 DynamicMappings.reverseFieldMappings,
                 DynamicMappings.reverseMethodMappings);
 
 
-        JarFile jar = mcJar;
+        JarOutputStream outJar = new JarOutputStream(new FileOutputStream(out));
 
-        if (jar == null) { System.out.println("Couldn't locate Minecraft jar!"); return; }
-
-        JarOutputStream outJar = null;
-        try {
-            outJar = new JarOutputStream(new FileOutputStream(out));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        for (Enumeration<JarEntry> enumerator = jar.entries(); enumerator.hasMoreElements();)
+        for (Enumeration<JarEntry> enumerator = mcJar.entries(); enumerator.hasMoreElements();)
         {
             JarEntry entry = enumerator.nextElement();
             String name = entry.getName();
-            byte[] bytes = null;
+            byte[] bytes;
 
             if (name.startsWith("META-INF/")) {
                 if (name.endsWith(".RSA") || name.endsWith(".SF")) continue;
@@ -129,7 +123,7 @@ public class SnapMap implements ITweaker {
                 name = mapped.name + ".class";
                 bytes = writer.toByteArray();
             }
-            else bytes = DynamicRemap.getFileFromZip(entry, jar);
+            else bytes = DynamicRemap.getFileFromZip(entry, mcJar);
 
             ZipEntry ze = new ZipEntry(name);
             try {
@@ -142,7 +136,7 @@ public class SnapMap implements ITweaker {
 
         try {
             outJar.close();
-            jar.close();
+            mcJar.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
